@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import mongoose from "mongoose";
+import cors from "cors";
 import customerRoute from "./routes/customerRoute.js";
 import publicRoute from "./routes/publicRoute.js";
 import sellerRoute from "./routes/sellersRoute.js";
@@ -10,6 +11,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 8000;
 
+app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
 
@@ -23,17 +25,13 @@ mongoose.connect(process.env.MONGO_DB, (err) => {
   }
 });
 
-// customer routes
+// routes
 app.use("/customer", customerRoute);
-
-// public routes
 app.use("/public", publicRoute);
-
-// sellers routes
 app.use("/seller", sellerRoute);
 
 app.get("/", (req, res) => res.send("Hello World!"));
 
-app.listen(port, () =>
-  console.log(`E-Commarce App listening on port ${port}!`)
-);
+app.listen(port, () => {
+  console.log(`E-Commarce App listening on port ${port}!`);
+});

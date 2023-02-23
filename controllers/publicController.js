@@ -5,10 +5,15 @@ const publicData = async (req, res) => {
     const productData = await Product.find();
     res.status(201).json({
       status: "succes",
-      results: Object.getOwnPropertyNames(productData).length,
+      results: productData.length,
       data: productData,
     });
-  } catch (error) {}
+  } catch (error) {
+    res.status(401).json({
+      status: "failed",
+      message: error.message,
+    });
+  }
 };
 
 const getPublicCart = async (req, res) => {

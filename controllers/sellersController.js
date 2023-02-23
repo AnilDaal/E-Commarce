@@ -86,12 +86,11 @@ const getProduct = async (req, res) => {
 
 const addProduct = async (req, res) => {
   const sellerId = req.params.sellerId;
-  console.log(sellerId);
   const { title, description, category, price, image } = req.body;
   try {
     const productData = await Product.create({
       title,
-      sellerId: sellerId,
+      sellerId,
       description,
       category,
       price,
