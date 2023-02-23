@@ -1,10 +1,13 @@
+import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 
 const wishlistSchema = new mongoose.Schema({
-  userid: String,
-  product: {
-    type: String,
-  },
+  customerId: String,
+  productId: [
+    {
+      type: String,
+    },
+  ],
 });
 
 const Wishlist = mongoose.model("Wishlist", wishlistSchema);

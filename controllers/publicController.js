@@ -11,7 +11,7 @@ const publicData = async (req, res) => {
   } catch (error) {}
 };
 
-const openPublicCart = async (req, res) => {
+const getPublicCart = async (req, res) => {
   try {
     // add product from cache memory I will see after
     // const publicCart = await
@@ -29,7 +29,7 @@ const addItemPublicCart = async (req, res) => {
   }
 };
 
-const openPublicWishlist = async (req, res) => {
+const getPublicWishlist = async (req, res) => {
   try {
     // add product in local storage in the browser and access in the brower without login
   } catch (error) {
@@ -40,7 +40,7 @@ const openPublicWishlist = async (req, res) => {
   }
 };
 
-const addItemWishlist = async (req, res) => {
+const addItemPublicWishlist = async (req, res) => {
   try {
     // add product in local storage in the browser and access in the brower without login
   } catch (error) {
@@ -53,8 +53,8 @@ const addItemWishlist = async (req, res) => {
 
 export {
   publicData,
-  openPublicCart,
+  getPublicCart,
   addItemPublicCart,
-  openPublicWishlist,
-  addItemWishlist,
+  getPublicWishlist,
+  addItemPublicWishlist,
 };

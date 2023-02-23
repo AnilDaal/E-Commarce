@@ -4,27 +4,32 @@ import {
   customerSignup,
   customerLogin,
   getCustomerCart,
-  getWishlistCustomer,
-  updateWishlistCustomer,
   updateCustomerCart,
   getHistory,
-  demo,
+  getCustomer,
+  getAllCustomer,
 } from "../controllers/customerController.js";
+
+import {
+  getWishlistCustomer,
+  updateWishlistCustomer,
+  addWishlistCustomer,
+} from "../controllers/wishlistController.js";
 
 // route middleware
 const router = express.Router();
 
 // cart route
-router.route("/:id/cart").get(getCustomerCart).post(updateCustomerCart);
+router.route("/:customerId/cart").get(getCustomerCart).post(updateCustomerCart);
 
 // wishlist route
 router
-  .route("/:id/wishlist")
+  .route("/:customerId/wishlist")
   .get(getWishlistCustomer)
-  .post(updateWishlistCustomer);
-
+  .put(updateWishlistCustomer);
+router.route("/:customerId/wishlist/:productId").post(addWishlistCustomer);
 // order route
-router.route("/:id/order").get(getHistory);
+router.route("/:customerId/order").get(getHistory);
 
 // signup route
 router.route("/signup").post(customerSignup);
@@ -32,6 +37,8 @@ router.route("/signup").post(customerSignup);
 // login route
 router.route("/login").post(customerLogin);
 
-router.route("/").get(demo);
+router.route("/:customerId").get(getCustomer);
+
+router.route("/").get(getAllCustomer);
 
 export default router;

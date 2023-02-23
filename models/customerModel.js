@@ -1,19 +1,21 @@
 import mongoose from "mongoose";
+import Wishlist from "./wishlistModel.js";
 import validator from "validator";
 
 const customerSchema = new mongoose.Schema({
-  id: {
-    type: String,
-  },
   name: String,
   email: {
     type: String,
   },
   password: String,
   number: String,
-  whishlist: String,
+  wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Wishlist,
+    },
+  ],
   address: String,
-  purchasehistory: String,
 });
 
 const Customer = mongoose.model("Customer", customerSchema);

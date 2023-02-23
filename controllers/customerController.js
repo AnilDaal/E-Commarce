@@ -112,58 +112,7 @@ const updateCustomerCart = async (req, res) => {
   }
 };
 
-// Customer Wishlist
-const getWishlistCustomer = async (req, res) => {
-  const customerId = req.params.id;
-  try {
-    const customerData = await Customer.findById(customerId);
-    //  get wishlist using customer schema
-    if (!customerData) {
-      return res.status(401).json({ status: "failed", data: customerData });
-    }
-    res.status(201).json({
-      status: "success",
-      data: customerData,
-    });
-  } catch (error) {
-    return res.status(501).json({ status: "failed", message: error.message });
-  }
-};
-
-const addWishlistCustomer = async (req, res) => {
-  const customerId = req.params.id;
-  try {
-    const customerData = await Customer.findById(customerId);
-    // update customer schema and add data in the wishlistcustomer
-    if (!customerData) {
-      return res.status(401).json({ status: "failed", data: customerData });
-    }
-    res.status(201).json({
-      status: "success",
-      data: customerData,
-    });
-  } catch (error) {
-    return res.status(501).json({ status: "failed", message: error.message });
-  }
-};
-
-const updateWishlistCustomer = async (req, res) => {
-  const customerId = req.params.id;
-  try {
-    const customerData = await Customer.findById(customerId);
-    if (!customerData) {
-      // update customer schema add wishlist cart data
-      return res.status(401).json({ status: "failed", data: customerData });
-    }
-    res.status(201).json({
-      status: "success",
-      data: customerData,
-    });
-  } catch (error) {
-    return res.status(501).json({ status: "failed", message: error.message });
-  }
-};
-
+// get history
 const getHistory = async (req, res) => {
   const customerId = req.params.id;
   try {
@@ -177,23 +126,47 @@ const getHistory = async (req, res) => {
       data: customerData,
     });
   } catch (error) {
-    return res.status(501).json({ status: "failed", message: error.message });
+    res.status(501).json({ status: "failed", message: error.message });
   }
 };
 
-const demo = async (req, res) => {
-  const data = await Customer.find();
-  res.json(data);
+const getCustomer = async (req, res) => {
+  const customerId = req.params.id;
+  try {
+    const customerData = await Customer.findById(customerId);
+    if (!customerData) {
+      return res.status(401).json({ status: "failed", data: customerData });
+    }
+    res.status(201).json({
+      status: "success",
+      data: customerData,
+    });
+  } catch (error) {
+    res.status(501).json({ status: "failed", message: error.message });
+  }
+};
+
+const getAllCustomer = async (req, res) => {
+  try {
+    const customerData = await Customer.find();
+    if (!customerData) {
+      return res.status(401).json({ status: "failed", data: customerData });
+    }
+    res.status(201).json({
+      status: "success",
+      data: customerData,
+    });
+  } catch (error) {
+    res.status(501).json({ status: "failed", message: error.message });
+  }
 };
 export {
+  getCustomer,
+  getAllCustomer,
   customerSignup,
   customerLogin,
   getCustomerCart,
   addCustomerCart,
-  getWishlistCustomer,
-  addWishlistCustomer,
   updateCustomerCart,
-  updateWishlistCustomer,
   getHistory,
-  demo,
 };
