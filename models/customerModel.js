@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Wishlist from "./wishlistModel.js";
+import Cart from "./cartModel.js";
 import validator from "validator";
 
 const customerSchema = new mongoose.Schema({
@@ -13,6 +14,12 @@ const customerSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: Wishlist,
+    },
+  ],
+  cart: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Cart,
     },
   ],
   address: String,

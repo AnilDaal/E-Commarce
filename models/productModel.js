@@ -4,7 +4,9 @@ const product = new mongoose.Schema({
   title: String,
   sellerId: String,
   description: String,
+  stock: { type: Boolean, default: true },
   category: String,
+  quantity: Number,
   price: String,
   date_added: {
     type: Date,

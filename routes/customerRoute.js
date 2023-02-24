@@ -1,33 +1,32 @@
 import express from "express";
 
 import {
-  customerSignup,
-  customerLogin,
-  getCustomerCart,
-  updateCustomerCart,
-  getHistory,
   getCustomer,
   getAllCustomer,
+  customerSignup,
+  customerLogin,
+  getHistory,
 } from "../controllers/customerController.js";
 
 import {
-  getWishlistCustomer,
-  updateWishlistCustomer,
-  addWishlistCustomer,
+  getCustomerCart,
+  updateCustomerCart,
+} from "../controllers/cartController.js";
+import {
+  getCustomerWishlist,
+  updateCustomerWishlist,
 } from "../controllers/wishlistController.js";
 
 // route middleware
 const router = express.Router();
 
 // cart route
-router.route("/:customerId/cart").get(getCustomerCart).post(updateCustomerCart);
+router.route("/:customerId/cart").get(getCustomerCart);
+router.route("/:customerId/cart/:productId").put(updateCustomerCart);
 
 // wishlist route
-router
-  .route("/:customerId/wishlist")
-  .get(getWishlistCustomer)
-  .put(updateWishlistCustomer);
-router.route("/:customerId/wishlist/:productId").post(addWishlistCustomer);
+router.route("/:customerId/wishlist").get(getCustomerWishlist);
+router.route("/:customerId/wishlist/:productId").put(updateCustomerWishlist);
 // order route
 router.route("/:customerId/order").get(getHistory);
 

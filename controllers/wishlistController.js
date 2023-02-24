@@ -2,7 +2,7 @@ import Wishlist from "../models/wishlistModel.js";
 import Product from "../models/productModel.js";
 
 // Customer Wishlist
-const getWishlistCustomer = async (req, res) => {
+const getCustomerWishlist = async (req, res) => {
   const customerId = req.params.customerId;
   try {
     const wishlistData = await Wishlist.findById(customerId);
@@ -19,39 +19,45 @@ const getWishlistCustomer = async (req, res) => {
   }
 };
 
-const addWishlistCustomer = async (req, res) => {
-  const customerId = req.params;
-  const { productId } = req.body;
+const addCustomerWishlist = async (customerId) => {
   try {
     const wishlistData = await Wishlist.create({
       _id: customerId,
-      product: productId,
     });
     // update customer schema and add data in the wishlistcustomer
-    if (!customerData) {
-      return res.status(401).json({ status: "failed", data: customerData });
+    if (!wishlistData) {
+      return { status: "failed", data: wishlistData };
     }
-    console.log(customerId);
-    // const addWishlist = await customerData.create({
+    // const addWishlist = await wishlistData.create({
     //   product: title,
     //   userid,
     // });
-    res.status(201).json({
+    return {
       status: "success",
-      data: customerData,
-    });
+      data: wishlistData,
+    };
   } catch (error) {
-    return res.status(501).json({ status: "failed", message: error.message });
+    return { status: "failed", message: error.message };
   }
 };
 
-const updateWishlistCustomer = async (req, res) => {
-  const customerId = req.params.id;
+const updateCustomerWishlist = async (req, res) => {
+  const { customerId, productId } = req.params;
   try {
-    const wishlistData = await Customer.findById(customerId);
+    const wishlistData = await Wishlist.findByIdAndUpdate(
+      customerId,
+      {
+        $push: {
+          product: productId,
+        },
+      },
+      {
+        new: true,
+      }
+    );
     if (!wishlistData) {
       // update customer schema add wishlist cart data
-      return res.status(401).json({ status: "failed", data: customerData });
+      return res.status(401).json({ status: "failed", data: wishlistData });
     }
     res.status(201).json({
       status: "success",
@@ -62,4 +68,4 @@ const updateWishlistCustomer = async (req, res) => {
   }
 };
 
-export { getWishlistCustomer, addWishlistCustomer, updateWishlistCustomer };
+export { getCustomerWishlist, addCustomerWishlist, updateCustomerWishlist };

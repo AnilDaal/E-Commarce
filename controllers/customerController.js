@@ -1,4 +1,6 @@
 import Customer from "../models/customerModel.js";
+import { addCustomerCart } from "../controllers/cartController.js";
+import { addCustomerWishlist } from "../controllers/wishlistController.js";
 import bcrypt from "bcrypt";
 
 //customer signup
@@ -18,9 +20,12 @@ const customerSignup = async (req, res) => {
       password: securePassword,
       number,
     });
+    // create cart and wishlist
+    addCustomerCart(customerData._id);
+    addCustomerWishlist(customerData._id);
+
     res.status(201).json({
       status: "success",
-      results: customerData.length,
       data: customerData,
     });
   } catch (error) {
@@ -59,59 +64,6 @@ const customerLogin = async (req, res) => {
   }
 };
 
-// CustomerCart
-
-const addCustomerCart = async (req, res) => {
-  const customerId = req.params.id;
-  try {
-    const customerData = await Customer.findById(customerId);
-    // task: add customer data and update in the cart field
-    if (!customerData) {
-      return res.status(401).json({ status: "failed", data: customerData });
-    }
-    res.status(201).json({
-      status: "success",
-      data: customerData,
-    });
-  } catch (error) {
-    return res.status(501).json({ status: "failed", message: error.message });
-  }
-};
-
-const getCustomerCart = async (req, res) => {
-  const customerId = req.params.id;
-  try {
-    const customerData = await Customer.findById(customerId);
-    // get customer cart using customer schema
-    if (!customerData) {
-      return res.status(401).json({ status: "failed", data: customerData });
-    }
-    res.status(201).json({
-      status: "success",
-      data: customerData,
-    });
-  } catch (error) {
-    res.status(501).json({ status: "failed", message: error.message });
-  }
-};
-
-const updateCustomerCart = async (req, res) => {
-  const customerId = req.params.id;
-  try {
-    const customerData = await Customer.findById(customerId);
-    // update cart schema using customer schema
-    if (!customerData) {
-      return res.status(401).json({ status: "failed", data: customerData });
-    }
-    res.status(201).json({
-      status: "success",
-      data: customerData,
-    });
-  } catch (error) {
-    return res.status(501).json({ status: "failed", message: error.message });
-  }
-};
-
 // get history
 const getHistory = async (req, res) => {
   const customerId = req.params.id;
@@ -139,6 +91,7 @@ const getCustomer = async (req, res) => {
     }
     res.status(201).json({
       status: "success",
+      results: customerData,
       data: customerData,
     });
   } catch (error) {
@@ -154,6 +107,7 @@ const getAllCustomer = async (req, res) => {
     }
     res.status(201).json({
       status: "success",
+      results: customerData.length,
       data: customerData,
     });
   } catch (error) {
@@ -165,8 +119,5 @@ export {
   getAllCustomer,
   customerSignup,
   customerLogin,
-  getCustomerCart,
-  addCustomerCart,
-  updateCustomerCart,
   getHistory,
 };
