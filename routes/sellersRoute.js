@@ -1,7 +1,8 @@
 import express from "express";
 
 import {
-  sellerSignup,
+  sellerKyc,
+  SellerSignup,
   SellerLogin,
   getProduct,
   addProduct,
@@ -17,9 +18,12 @@ router.route("/:sellerId/product").get(getProduct).post(addProduct);
 router.route("/:sellerId/product/:productId").put(updateProduct);
 
 // signup route
-router.route("/signup").post(sellerSignup);
+router.route("/signup").post(SellerSignup);
 
 // login route
 router.route("/login").post(SellerLogin);
+
+// kyc of sellers
+router.route("/sellerKyc").post(sellerKyc);
 
 export default router;

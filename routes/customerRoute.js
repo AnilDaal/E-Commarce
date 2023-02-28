@@ -1,8 +1,6 @@
 import express from "express";
 
 import {
-  getCustomer,
-  getAllCustomer,
   customerSignup,
   customerLogin,
   getHistory,
@@ -35,9 +33,5 @@ router.route("/signup").post(customerSignup);
 
 // login route
 router.route("/login").post(customerLogin);
-
-router.route("/:customerId").get(getCustomer);
-
-router.route("/").get(getAllCustomer);
 
 export default router;

@@ -1,4 +1,5 @@
 import Cart from "../models/cartModel.js";
+import Customer from "../models/customerModel.js";
 
 const addCustomerCart = async (customerId) => {
   try {
@@ -20,7 +21,10 @@ const addCustomerCart = async (customerId) => {
 const getCustomerCart = async (req, res) => {
   const customerId = req.params.customerId;
   try {
-    const cartData = await Cart.findById(customerId);
+    const cartData = await Customer.find().populate({
+      path: "wishlist",
+      model: "Wishlist",
+    });
     // get customer cart using customer schema
     if (!cartData) {
       return res.status(401).json({ status: "failed", data: cartData });

@@ -82,42 +82,4 @@ const getHistory = async (req, res) => {
   }
 };
 
-const getCustomer = async (req, res) => {
-  const customerId = req.params.id;
-  try {
-    const customerData = await Customer.findById(customerId);
-    if (!customerData) {
-      return res.status(401).json({ status: "failed", data: customerData });
-    }
-    res.status(201).json({
-      status: "success",
-      results: customerData,
-      data: customerData,
-    });
-  } catch (error) {
-    res.status(501).json({ status: "failed", message: error.message });
-  }
-};
-
-const getAllCustomer = async (req, res) => {
-  try {
-    const customerData = await Customer.find();
-    if (!customerData) {
-      return res.status(401).json({ status: "failed", data: customerData });
-    }
-    res.status(201).json({
-      status: "success",
-      results: customerData.length,
-      data: customerData,
-    });
-  } catch (error) {
-    res.status(501).json({ status: "failed", message: error.message });
-  }
-};
-export {
-  getCustomer,
-  getAllCustomer,
-  customerSignup,
-  customerLogin,
-  getHistory,
-};
+export { customerSignup, customerLogin, getHistory };

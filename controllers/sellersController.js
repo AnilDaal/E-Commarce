@@ -1,28 +1,54 @@
 import Seller from "../models/sellerModel.js";
 import bcrypt from "bcrypt";
 import Product from "../models/productModel.js";
+import SellerKyc from "../models/sellerKycModel.js";
 
 // seller signup
-const sellerSignup = async (req, res) => {
-  const { name, email, password, number, address } = req.body;
-  if (!email || !password || !name || !number || !address) {
+const sellerKyc = async (req, res) => {
+  const { name, email, password, number, address, pancard, adharcard } =
+    req.body;
+  if (!email || !pancard || !adharcard || !name || !number || !address) {
     return res
       .status(401)
       .json({ status: "Failed", message: "Please fill all field" });
   }
   try {
-    const salt = await bcrypt.genSalt(10);
-    const securePassword = await bcrypt.hash(password, salt);
-    const productData = await Seller.create({
+    const sellerData = await SellerKyc.create({
       name,
       email,
-      password: securePassword,
+      pancard,
+      adharcard,
       number,
       address,
     });
     res.status(201).json({
       status: "success",
-      data: productData,
+      data: sellerData,
+    });
+  } catch (error) {
+    res.status(501).json({ status: "fail", message: error.message });
+  }
+};
+
+const SellerSignup = async (req, res) => {
+  const { name, email, password, number } = req.body;
+  if (!email || !name || !number || !password) {
+    return res
+      .status(401)
+      .json({ status: "Failed", message: "Please fill all field" });
+  }
+  const salt = await bcrypt.genSalt(10);
+  const securePassword = await bcrypt.hash(password, salt);
+  try {
+    const sellerData = await Seller.create({
+      name,
+      email,
+      number,
+      password: securePassword,
+    });
+    res.status(201).json({
+      status: "success",
+      data: sellerData,
     });
   } catch (error) {
     res.status(501).json({ status: "fail", message: error.message });
@@ -46,7 +72,7 @@ const SellerLogin = async (req, res) => {
         message: "invailid id ",
       });
     }
-    const securePassword = await bcrypt.compare(password, sellerData.password);
+    const securePassword = bcrypt.compare(password, sellerData.password);
     console.log(securePassword);
     if (!securePassword) {
       return res.status(401).json({
@@ -137,4 +163,11 @@ const updateProduct = async (req, res) => {
     res.status(501).json({ status: "failed", message: error.message });
   }
 };
-export { sellerSignup, SellerLogin, getProduct, addProduct, updateProduct };
+export {
+  sellerKyc,
+  SellerSignup,
+  SellerLogin,
+  getProduct,
+  addProduct,
+  updateProduct,
+};
