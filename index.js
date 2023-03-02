@@ -6,6 +6,8 @@ import customerRoute from "./routes/customerRoute.js";
 import publicRoute from "./routes/publicRoute.js";
 import sellerRoute from "./routes/sellersRoute.js";
 import dotenv from "dotenv";
+import AppError from "./utils/appError.js";
+import globelErrorHandling from "./controllers/errorController.js";
 
 dotenv.config();
 const app = express();
@@ -26,11 +28,16 @@ mongoose.connect(process.env.MONGO_DB, (err) => {
 });
 
 // routes
-app.use("/customer", customerRoute);
-app.use("/public", publicRoute);
-app.use("/seller", sellerRoute);
+app.use("/api/v1/customer", customerRoute);
+app.use("/api/v1/public", publicRoute);
+app.use("/api/v1/seller", sellerRoute);
 
-app.get("/", (req, res) => res.send("Hello World!"));
+app.get("/", (req, res) => res.send("Hello India!"));
+app.all("*", (req, res, next) => {
+  next(new AppError(`Can't find ${req.url} on this server`, 404));
+});
+
+app.use(globelErrorHandling);
 
 app.listen(port, () => {
   console.log(`E-Commarce App listening on port ${port}!`);

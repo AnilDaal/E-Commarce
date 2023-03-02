@@ -5,6 +5,8 @@ const wishlistSchema = new mongoose.Schema({
   productId: [
     {
       type: String,
+      unique: [true, "Id must be unique"],
+      required: true,
     },
   ],
 });
