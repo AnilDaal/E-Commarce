@@ -1,23 +1,14 @@
 import mongoose, { Schema } from "mongoose";
 
 const sellerSchema = new Schema({
-  name: {
-    type: String,
-    required: [true, "seller must have name"],
-    minlength: 4,
-    maxlength: 30,
-  },
-  email: {
-    type: String,
-    required: [true, "seller must have email"],
-    unique: [true, "email allready exist"],
-  },
-  password: {
-    type: String,
-    required: [true, "seller must have password"],
-    minlength: 8,
-    maxlength: 20,
-  },
+  name: { type: String, require: [true, "seller must have name"] },
+  email: { type: String, require: [true, "seller must have email"] },
+  pancard: String,
+  adharcard: String,
+  number: String,
+  address: String,
+  password: String,
+  isVerified: { type: Boolean, default: false },
   date_added: { type: Date, default: Date.now(), select: false },
 });
 

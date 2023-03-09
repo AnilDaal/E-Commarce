@@ -1,9 +1,7 @@
 import express from "express";
 import {
   publicData,
-  getPublicCart,
   addItemPublicCart,
-  getPublicWishlist,
   addItemPublicWishlist,
 } from "../controllers/publicController.js";
 const router = express.Router();
@@ -12,9 +10,9 @@ const router = express.Router();
 router.route("/").get(publicData);
 
 // public cart
-router.route("/cart").get(getPublicCart).put(addItemPublicCart);
+router.route("/cart").put(addItemPublicCart);
 
 // public wishlist
-router.route("/wishlist").get(getPublicWishlist).put(addItemPublicWishlist);
+router.route("/wishlist").put(addItemPublicWishlist);
 
 export default router;

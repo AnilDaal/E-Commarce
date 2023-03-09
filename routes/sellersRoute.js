@@ -1,7 +1,6 @@
 import express from "express";
 
 import {
-  sellerKyc,
   SellerSignup,
   SellerLogin,
   getProduct,
@@ -24,6 +23,5 @@ router.route("/signup").post(SellerSignup);
 router.route("/login").post(SellerLogin);
 
 // kyc of sellers
-router.route("/sellerKyc").post(sellerKyc);
 
 export default router;

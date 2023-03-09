@@ -8,6 +8,7 @@ import sellerRoute from "./routes/sellersRoute.js";
 import dotenv from "dotenv";
 import AppError from "./utils/appError.js";
 import globelErrorHandling from "./controllers/errorController.js";
+import adminRoute from "./routes/adminRoute.js";
 
 dotenv.config();
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.json());
 
 //mongoose
 mongoose.set("strictQuery", true);
+// mongoose.set("bufferCommands", false);
 mongoose.connect(process.env.MONGO_DB, (err) => {
   if (err) {
     console.log(err.message);
@@ -31,6 +33,7 @@ mongoose.connect(process.env.MONGO_DB, (err) => {
 app.use("/api/v1/customer", customerRoute);
 app.use("/api/v1/public", publicRoute);
 app.use("/api/v1/seller", sellerRoute);
+app.use("/api/v1/admin", adminRoute);
 
 app.get("/", (req, res) => res.send("Hello India!"));
 app.all("*", (req, res, next) => {

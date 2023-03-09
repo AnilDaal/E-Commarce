@@ -7,7 +7,8 @@ const adminSchema = new mongoose.Schema({
   email: {
     type: String,
   },
+  password: { type: String, minlength: 4 },
 });
-// demo
+
 const Admin = mongoose.model("Admin", adminSchema);
 export default Admin;

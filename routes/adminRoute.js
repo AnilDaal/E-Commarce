@@ -1,13 +1,14 @@
 import express from "express";
 import {
+  adminLogin,
   getAllCustomer,
   getSingleCustomer,
   getAllSeller,
   getSingleSeller,
   deleteCustomer,
   deleteSeller,
-  varifyKyc,
-  adminLogin,
+  verifyKyc,
+  adminSignup,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -15,13 +16,14 @@ const router = express.Router();
 // adminlogin
 
 router.route("/login").post(adminLogin);
+router.route("/signup").post(adminSignup);
 
 // sellers Controle
 router.route("/seller").get(getAllSeller);
 router
   .route("/seller/:sellerId/")
   .get(getSingleSeller)
-  .put(varifyKyc)
+  .put(verifyKyc)
   .delete(deleteSeller);
 
 // customer Controle
@@ -30,3 +32,5 @@ router
   .route("/customer/:customerId")
   .get(getSingleCustomer)
   .delete(deleteCustomer);
+
+export default router;

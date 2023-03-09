@@ -21,10 +21,11 @@ const addCustomerCart = async (customerId) => {
 const getCustomerCart = async (req, res) => {
   const customerId = req.params.customerId;
   try {
-    const cartData = await Customer.find().populate({
-      path: "wishlist",
-      model: "Wishlist",
-    });
+    const cartData = await Cart.findById(customerId);
+    // .populate({
+    //   path: "wishlist",
+    //   model: "Wishlist",
+    // });
     // get customer cart using customer schema
     if (!cartData) {
       return res.status(401).json({ status: "failed", data: cartData });
@@ -45,7 +46,33 @@ const updateCustomerCart = async (req, res) => {
       customerId,
       {
         $push: {
-          product: productId,
+          productId,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+    // update cart schema using customer schema
+    if (!cartData) {
+      return res.status(401).json({ status: "failed", data: cartData });
+    }
+    res.status(201).json({
+      status: "success",
+      data: cartData,
+    });
+  } catch (error) {
+    return res.status(401).json({ status: "failed", message: error.message });
+  }
+};
+const deleteItemCustomerCart = async (req, res) => {
+  const { customerId, productId } = req.params;
+  try {
+    const cartData = await Cart.findByIdAndUpdate(
+      customerId,
+      {
+        $pull: {
+          productId,
         },
       },
       {
@@ -65,4 +92,9 @@ const updateCustomerCart = async (req, res) => {
   }
 };
 
-export { getCustomerCart, addCustomerCart, updateCustomerCart };
+export {
+  getCustomerCart,
+  addCustomerCart,
+  updateCustomerCart,
+  deleteItemCustomerCart,
+};

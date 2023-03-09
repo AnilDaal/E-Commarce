@@ -1,4 +1,6 @@
 import Product from "../models/productModel.js";
+import Wishlist from "../models/wishlistModel.js";
+import Cart from "../models/cartModel.js";
 
 const publicData = async (req, res) => {
   try {
@@ -16,16 +18,29 @@ const publicData = async (req, res) => {
   }
 };
 
-const getPublicCart = async (req, res) => {
-  try {
-    // add product from cache memory I will see after
-    // const publicCart = await
-  } catch (error) {}
-};
+// const getPublicCart = async (req, res) => {
+
+//   } catch (error) {res.status(401).json({
+//     status: "failed",
+//     message: error.message,})
+// }};
 
 const addItemPublicCart = async (req, res) => {
+  const { customerId, productId } = req.body;
   try {
-    // add product in local storage in the browser and access in the brower without login
+    const cartData = await Cart.findByIdAndUpdate(
+      customerId,
+      {
+        $push: {
+          productId,
+        },
+      },
+      { new: true }
+    );
+    res.status(201).json({
+      status: "success",
+      data: cartData,
+    });
   } catch (error) {
     res.status(401).json({
       status: "failed",
@@ -34,20 +49,33 @@ const addItemPublicCart = async (req, res) => {
   }
 };
 
-const getPublicWishlist = async (req, res) => {
-  try {
-    // add product in local storage in the browser and access in the brower without login
-  } catch (error) {
-    res.status(401).json({
-      status: "failed",
-      message: error.message,
-    });
-  }
-};
+// const getPublicWishlist = async (req, res) => {
+//   try {
+//     // add product in local storage in the browser and access in the brower without login
+//   } catch (error) {
+//     res.status(401).json({
+//       status: "failed",
+//       message: error.message,
+//     });
+//   }
+// };
 
 const addItemPublicWishlist = async (req, res) => {
+  const { customerId, productId } = req.body;
   try {
-    // add product in local storage in the browser and access in the brower without login
+    const wishlistData = await Wishlist.findByIdAndUpdate(
+      customerId,
+      {
+        $push: {
+          productId,
+        },
+      },
+      { new: true }
+    );
+    res.status(201).json({
+      status: "success",
+      data: wishlistData,
+    });
   } catch (error) {
     res.status(401).json({
       status: "failed",
@@ -56,10 +84,4 @@ const addItemPublicWishlist = async (req, res) => {
   }
 };
 
-export {
-  publicData,
-  getPublicCart,
-  addItemPublicCart,
-  getPublicWishlist,
-  addItemPublicWishlist,
-};
+export { publicData, addItemPublicCart, addItemPublicWishlist };
