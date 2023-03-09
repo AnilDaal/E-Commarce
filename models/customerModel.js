@@ -6,6 +6,7 @@ const customerSchema = new mongoose.Schema({
   name: String,
   email: {
     type: String,
+    unique: [true, "Email allready registred"],
   },
   password: String,
   number: String,
