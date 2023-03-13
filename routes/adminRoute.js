@@ -18,7 +18,7 @@ const router = express.Router();
 router.route("/login").post(adminLogin);
 router.route("/signup").post(adminSignup);
 
-// sellers Controle
+// sellers Controler
 router.route("/seller").get(getAllSeller);
 router
   .route("/seller/:sellerId/")
