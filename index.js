@@ -30,10 +30,10 @@ mongoose.connect(process.env.MONGO_DB, (err) => {
 });
 
 // routes
-app.use("/api/v1/customer", customerRoute);
-app.use("/api/v1/public", publicRoute);
-app.use("/api/v1/seller", sellerRoute);
-app.use("/api/v1/admin", adminRoute);
+app.use("/api/v1/customer/", customerRoute);
+app.use("/api/v1/public/", publicRoute);
+app.use("/api/v1/seller/", sellerRoute);
+app.use("/api/v1/admin/", adminRoute);
 
 app.get("/", (req, res) => res.send("Hello India!"));
 app.all("*", (req, res, next) => {
