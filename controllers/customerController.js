@@ -33,7 +33,7 @@ const customerSignup = catchAsync(async (req, res) => {
 // customer login
 const customerLogin = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const customerData = Customer.find({ email });
+  const customerData = await Customer.findOne({ email });
   if (!customerData) {
     return res.status(401).json({
       status: "failed",
