@@ -112,7 +112,7 @@ const adminLogin = catchAsync(async (req, res, next) => {
   }
   const adminData = await Admin.findOne({ email });
 
-  if (!adminData && !(await bcrypt.compare(password, adminData.password))) {
+  if (!adminData || !(await bcrypt.compare(password, adminData.password))) {
     return next(new AppError("invalid email or password", 401));
   }
   const token = jwt.sign({ id: adminData._id }, process.env.SECRET_KEY, {

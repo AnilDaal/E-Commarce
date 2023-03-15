@@ -41,7 +41,7 @@ const customerLogin = catchAsync(async (req, res, next) => {
   }
   const customerData = await Customer.findOne({ email });
   if (
-    !customerData &&
+    !customerData ||
     (await bcrypt.compare(password, customerData.password))
   ) {
     return next(new AppError("email or password not match", 401));

@@ -26,9 +26,9 @@ router.route("/login").post(adminLogin);
 router.route("/signup").post(adminSignup);
 
 // sellers Controler
-router.route("/seller/").get(authAdmin, getAllSeller);
+router.route("/seller").get(authAdmin, getAllSeller);
 router
-  .route("/seller/:sellerId/")
+  .route("/seller/:sellerId")
   .get(authAdmin, getSingleSeller)
   .put(authAdmin, verifyKyc)
   .delete(authAdmin, deleteSeller);

@@ -36,7 +36,7 @@ const SellerLogin = catchAsync(async (req, res, next) => {
     return next(new AppError("Please fill all field", 401));
   }
   const sellerData = await Seller.findOne({ email });
-  if (!sellerData && (await bcrypt.compare(password, sellerData.password))) {
+  if (!sellerData || (await bcrypt.compare(password, sellerData.password))) {
     return next(new AppError("email or password not match", 401));
   }
   if (!sellerData.isVerified) {
