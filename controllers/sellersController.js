@@ -36,7 +36,7 @@ const SellerLogin = catchAsync(async (req, res, next) => {
     return next(new AppError("Please fill all field", 401));
   }
   const sellerData = await Seller.findOne({ email });
-  if (!sellerData || (await bcrypt.compare(password, sellerData.password))) {
+  if (!sellerData && (await bcrypt.compare(password, sellerData.password))) {
     return next(new AppError("email or password not match", 401));
   }
   if (!sellerData.isVerified) {
@@ -75,14 +75,7 @@ const addProduct = catchAsync(async (req, res, next) => {
   if (!title || !description || !category || !price || image) {
     return next(new AppError("please fill all field", 401));
   }
-  const productData = await Product.create({
-    title,
-    sellerId,
-    description,
-    category,
-    price,
-    image,
-  });
+  const productData = await Product.create({ ...req.body, sellerId });
   // productData._id = sellerId;
   res.status(201).json({
     status: "success",
