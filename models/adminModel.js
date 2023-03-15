@@ -6,7 +6,11 @@ const adminSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    unique: true,
   },
+  isAdmin: { type: Boolean, default: true },
+  isSeller: { type: Boolean, default: false },
+  isCustomer: { type: Boolean, default: false },
   password: { type: String, minlength: 4 },
 });
 

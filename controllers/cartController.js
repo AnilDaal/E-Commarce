@@ -1,21 +1,17 @@
 import Cart from "../models/cartModel.js";
-import Customer from "../models/customerModel.js";
 import catchAsync from "../utils/catchAsync.js";
 
 const addCustomerCart = catchAsync(async (customerId) => {
   const cartData = await Cart.create({
     _id: customerId,
   });
-  if (!cartData) {
-    return { status: "failed", data: cartData };
-  }
   return {
     status: "success",
     data: cartData,
   };
 });
 
-const getCustomerCart = catchAsync(async (req, res) => {
+const getCustomerCart = catchAsync(async (req, res, next) => {
   const customerId = req.params.customerId;
   const cartData = await Cart.findById(customerId);
   // .populate({
@@ -24,7 +20,7 @@ const getCustomerCart = catchAsync(async (req, res) => {
   // });
   // get customer cart using customer schema
   if (!cartData) {
-    return res.status(401).json({ status: "failed", data: cartData });
+    return next(new AppError("No Cart found with this Id", 401));
   }
   res.status(201).json({
     status: "success",
@@ -32,7 +28,7 @@ const getCustomerCart = catchAsync(async (req, res) => {
   });
 });
 
-const updateCustomerCart = catchAsync(async (req, res) => {
+const updateCustomerCart = catchAsync(async (req, res, next) => {
   const { customerId, productId } = req.params;
   const cartData = await Cart.findByIdAndUpdate(
     customerId,
@@ -47,14 +43,14 @@ const updateCustomerCart = catchAsync(async (req, res) => {
   );
   // update cart schema using customer schema
   if (!cartData) {
-    return res.status(401).json({ status: "failed", data: cartData });
+    return next(new AppError("No Cart found with this Id", 401));
   }
   res.status(201).json({
     status: "success",
     data: cartData,
   });
 });
-const deleteItemCustomerCart = catchAsync(async (req, res) => {
+const deleteItemCustomerCart = catchAsync(async (req, res, next) => {
   const { customerId, productId } = req.params;
   const cartData = await Cart.findByIdAndUpdate(
     customerId,
@@ -69,7 +65,7 @@ const deleteItemCustomerCart = catchAsync(async (req, res) => {
   );
   // update cart schema using customer schema
   if (!cartData) {
-    return res.status(401).json({ status: "failed", data: cartData });
+    return next(new AppError("No Cart found with this Id", 401));
   }
   res.status(201).json({
     status: "success",

@@ -6,9 +6,13 @@ const customerSchema = new mongoose.Schema({
   name: String,
   email: {
     type: String,
-    validate: [validator.isEmail, "enter a valid email"],
-    unique: [true, "Email allready registred"],
+    required: true,
+    unique: true,
+    validate: [validator.isEmail, "not a valid email"],
   },
+  isAdmin: { type: Boolean, default: false },
+  isSeller: { type: Boolean, default: false },
+  isCustomer: { type: Boolean, default: true },
   password: String,
   number: String,
   wishlist: [

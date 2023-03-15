@@ -2,7 +2,14 @@ import mongoose, { Schema } from "mongoose";
 
 const sellerSchema = new Schema({
   name: { type: String, require: [true, "seller must have name"] },
-  email: { type: String, require: [true, "seller must have email"] },
+  email: {
+    type: String,
+    require: [true, "seller must have email"],
+    unique: true,
+  },
+  isAdmin: { type: Boolean, default: false },
+  isSeller: { type: Boolean, default: true },
+  isCustomer: { type: Boolean, default: false },
   pancard: String,
   adharcard: String,
   number: String,

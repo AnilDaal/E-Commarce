@@ -3,12 +3,12 @@ import Product from "../models/productModel.js";
 import catchAsync from "../utils/catchAsync.js";
 
 // Customer Wishlist
-const getCustomerWishlist = catchAsync(async (req, res) => {
+const getCustomerWishlist = catchAsync(async (req, res, next) => {
   const customerId = req.params.customerId;
   const wishlistData = await Wishlist.findById(customerId);
   //  get wishlist using customer schema
   if (!wishlistData) {
-    return res.status(401).json({ status: "failed", data: wishlistData });
+    return next(new AppError("No Wishlist found with this Id", 401));
   }
   res.status(201).json({
     status: "success",
@@ -21,9 +21,6 @@ const addCustomerWishlist = catchAsync(async (customerId) => {
     _id: customerId,
   });
   // update customer schema and add data in the wishlistcustomer
-  if (!wishlistData) {
-    return { status: "failed", data: wishlistData };
-  }
   // const addWishlist = await wishlistData.create({
   //   product: title,
   //   userid,
@@ -34,7 +31,7 @@ const addCustomerWishlist = catchAsync(async (customerId) => {
   };
 });
 
-const updateCustomerWishlist = catchAsync(async (req, res) => {
+const updateCustomerWishlist = catchAsync(async (req, res, next) => {
   const { customerId, productId } = req.params;
   const wishlistData = await Wishlist.findByIdAndUpdate(
     customerId,
@@ -48,8 +45,7 @@ const updateCustomerWishlist = catchAsync(async (req, res) => {
     }
   );
   if (!wishlistData) {
-    // update customer schema add wishlist cart data
-    return res.status(401).json({ status: "failed", data: wishlistData });
+    return next(new AppError("No Wishlist found with this Id", 401));
   }
   res.status(201).json({
     status: "success",
@@ -57,7 +53,7 @@ const updateCustomerWishlist = catchAsync(async (req, res) => {
   });
 });
 
-const deleteItemCustomerWishlist = catchAsync(async (req, res) => {
+const deleteItemCustomerWishlist = catchAsync(async (req, res, next) => {
   const { customerId, productId } = req.params;
   const wishlistData = await Wishlist.findByIdAndUpdate(
     customerId,
@@ -71,8 +67,7 @@ const deleteItemCustomerWishlist = catchAsync(async (req, res) => {
     }
   );
   if (!wishlistData) {
-    // update customer schema add wishlist cart data
-    return res.status(401).json({ status: "failed", data: wishlistData });
+    return next(new AppError("No Wishlist found with this Id", 401));
   }
   res.status(201).json({
     status: "success",

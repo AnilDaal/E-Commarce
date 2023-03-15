@@ -3,16 +3,16 @@ import { addCustomerCart } from "../controllers/cartController.js";
 import { addCustomerWishlist } from "../controllers/wishlistController.js";
 import bcrypt from "bcrypt";
 import catchAsync from "../utils/catchAsync.js";
+import jwt from "jsonwebtoken";
+import AppError from "../utils/appError.js";
 
 //customer signup
-const customerSignup = catchAsync(async (req, res) => {
+const customerSignup = catchAsync(async (req, res, next) => {
   const { name, email, password, number } = req.body;
   if (!email || !password || !name || !number) {
-    return res
-      .status(401)
-      .json({ status: "Failed", message: "Please fill all field" });
+    return next(new AppError("Please Enter All field", 401));
   }
-  const salt = await bcrypt.genSalt(10);
+  const salt = await bcrypt.genSalt(12);
   const securePassword = await bcrypt.hash(password, salt);
   const customerData = await Customer.create({
     name,
@@ -24,38 +24,40 @@ const customerSignup = catchAsync(async (req, res) => {
   addCustomerCart(customerData._id);
   addCustomerWishlist(customerData._id);
 
+  const token = jwt.sign({ id: customerData._id }, process.env.SECRET_KEY_CUS, {
+    expiresIn: "7d",
+  });
   res.status(201).json({
     status: "success",
-    data: customerData,
+    token,
   });
 });
 
 // customer login
-const customerLogin = catchAsync(async (req, res) => {
+const customerLogin = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
+  if (!email || !password) {
+    return next(new AppError("Please Enter Email or Password", 401));
+  }
   const customerData = await Customer.findOne({ email });
-  if (!customerData) {
-    return res.status(401).json({
-      status: "failed",
-      message: "invailid id ",
-    });
+  if (
+    !customerData &&
+    (await bcrypt.compare(password, customerData.password))
+  ) {
+    return next(new AppError("email or password not match", 401));
   }
-  const securePassword = await bcrypt.compare(password, customerData.password);
-  if (!securePassword) {
-    return res.status(401).json({
-      status: "failed",
-      message: "invailid password",
-    });
-  }
+  const token = jwt.sign({ id: customerData._id }, process.env.SECRET_KEY_CUS, {
+    expiresIn: "7d",
+  });
 
   res.status(201).json({
     status: "success",
-    data: customerData,
+    token,
   });
 });
 
 // get history
-const getHistory = catchAsync(async (req, res) => {
+const getHistory = catchAsync(async (req, res, next) => {
   const customerId = req.params.id;
   const customerData = await Order.findById(customerId);
   // update order schema and
