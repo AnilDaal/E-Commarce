@@ -10,6 +10,7 @@ const customerSchema = new mongoose.Schema({
     validate: [validator.isEmail, "Enter correct email"],
     unique: [true, "Email must be unique"],
     required: [true, "Email must be required"],
+    lowercase: true,
   },
   isAdmin: { type: Boolean, default: false },
   isSeller: { type: Boolean, default: false },
@@ -44,6 +45,7 @@ const customerSchema = new mongoose.Schema({
       ref: Cart,
     },
   ],
+  isVerified: { type: Boolean, default: false },
   address: String,
 });
 

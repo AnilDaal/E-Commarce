@@ -7,13 +7,27 @@ import AppError from "../utils/appError.js";
 
 // seller signup
 const SellerSignup = catchAsync(async (req, res, next) => {
-  const { name, email, password, number, address, pancard, adharcard } =
-    req.body;
-  if (!email || !pancard || !adharcard || !name || !number || !address) {
+  const {
+    name,
+    email,
+    password,
+    number,
+    address,
+    pancard,
+    confirmPassword,
+    adharcard,
+  } = req.body;
+  if (
+    !email ||
+    !pancard ||
+    !adharcard ||
+    !name ||
+    !number ||
+    !address ||
+    !confirmPassword
+  ) {
     return next(new AppError("Please fill all field", 401));
   }
-  const salt = await bcrypt.genSalt(10);
-  const securePassword = await bcrypt.hash(password, salt);
   const sellerData = await Seller.create({
     name,
     email,
@@ -21,7 +35,8 @@ const SellerSignup = catchAsync(async (req, res, next) => {
     adharcard,
     number,
     address,
-    password: securePassword,
+    password,
+    confirmPassword,
   });
   res.status(201).json({
     status: "success",
@@ -35,8 +50,11 @@ const SellerLogin = catchAsync(async (req, res, next) => {
   if (!email || !password) {
     return next(new AppError("Please fill all field", 401));
   }
-  const sellerData = await Seller.findOne({ email });
-  if (!sellerData && (await bcrypt.compare(password, sellerData.password))) {
+  const sellerData = await Seller.findOne({ email }).select("+password");
+  if (
+    !sellerData &&
+    !(await sellerData.securePassword(password, sellerData.password))
+  ) {
     return next(new AppError("email or password not match", 401));
   }
   if (!sellerData.isVerified) {

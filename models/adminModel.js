@@ -11,6 +11,7 @@ const adminSchema = new mongoose.Schema({
     validate: [validator.isEmail, "Enter correct email"],
     unique: [true, "Email must be unique"],
     required: [true, "Email must be required"],
+    lowercase: true,
   },
   isAdmin: { type: Boolean, default: true },
   isSeller: { type: Boolean, default: false },
