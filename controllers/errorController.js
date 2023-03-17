@@ -19,6 +19,11 @@ const handleJWTExpire = (err) => {
   const message = "your token have expire! Please login again.";
   return new AppError(message, 400);
 };
+const handleValidationError = (err) => {
+  const errors = Object.values(err.errors).map((el) => el.message);
+  const message = `Invalid input data. ${errors.join(". ")}`;
+  return new AppError(message, 400);
+};
 
 const sendErrorDev = (err, res) => {
   return res.status(err.statusCode).json({
@@ -52,7 +57,7 @@ export default (err, req, res, next) => {
   if (process.env.NODE_ENV === "development") {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
-    let error = { ...err, message: err.message };
+    let error = err;
     if (error.name === "CastError") {
       error = handleCastErrorDB(error);
     } else if (error.code === 11000) {
@@ -61,8 +66,9 @@ export default (err, req, res, next) => {
       error = handleJWTError(error);
     } else if (error.name === "TokenExpiredError") {
       error = handleJWTExpire(error);
+    } else if (error.name === "ValidationError") {
+      error = handleValidationError(error);
     }
-
     sendErrorProd(error, res);
   }
 };

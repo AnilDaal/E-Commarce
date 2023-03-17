@@ -1,5 +1,6 @@
 import Cart from "../models/cartModel.js";
 import catchAsync from "../utils/catchAsync.js";
+import AppError from "../utils/appError.js";
 
 const addCustomerCart = catchAsync(async (customerId) => {
   const cartData = await Cart.create({

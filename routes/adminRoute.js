@@ -9,6 +9,7 @@ import {
   deleteSeller,
   verifyKyc,
   adminSignup,
+  updateAdmin,
 } from "../controllers/adminController.js";
 import { authAdmin } from "../middlewares/auth.js";
 import {
@@ -24,6 +25,7 @@ const router = express.Router();
 
 router.route("/login").post(adminLogin);
 router.route("/signup").post(adminSignup);
+router.route("/").put(authAdmin, updateAdmin);
 
 // sellers Controler
 router.route("/seller").get(authAdmin, getAllSeller);

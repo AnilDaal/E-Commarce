@@ -110,9 +110,11 @@ const adminLogin = catchAsync(async (req, res, next) => {
   if (!email || !password) {
     return next(new AppError("Please enter email or password", 400));
   }
-  const adminData = await Admin.findOne({ email });
-
-  if (!adminData || !(await bcrypt.compare(password, adminData.password))) {
+  const adminData = await Admin.findOne({ email }).select("+password");
+  if (
+    !adminData ||
+    !(await adminData.securePassword(password, adminData.password))
+  ) {
     return next(new AppError("invalid email or password", 401));
   }
   const token = jwt.sign({ id: adminData._id }, process.env.SECRET_KEY, {
@@ -121,20 +123,20 @@ const adminLogin = catchAsync(async (req, res, next) => {
 
   res.status(201).json({
     status: "success",
+    data: adminData,
     token,
   });
 });
 
 const adminSignup = catchAsync(async (req, res, next) => {
-  const { email, password, name } = req.body;
-  if (!email || !password || !name) {
-    next(new AppError("please fill all filled", 401));
+  const { email, password, name, confirmPassword } = req.body;
+  if (!email || !password || !name || !confirmPassword) {
+    return next(new AppError("Please Enter All field", 401));
   }
-  const salt = await bcrypt.genSalt(10);
-  const securePassword = await bcrypt.hash(password, salt);
   const adminData = await Admin.create({
     email,
-    password: securePassword,
+    password,
+    confirmPassword,
     name,
   });
   const token = jwt.sign({ id: adminData._id }, process.env.SECRET_KEY, {
@@ -142,13 +144,38 @@ const adminSignup = catchAsync(async (req, res, next) => {
   });
   res.status(201).json({
     status: "success",
+    data: adminData,
     token,
+  });
+});
+
+const updateAdmin = catchAsync(async (req, res, next) => {
+  const { email, password, name } = req.body;
+  const adminId = req.id;
+  if (!adminId) {
+    return next("Can't find admin id", 401);
+  }
+  const adminData = await Admin.findByIdAndUpdate(
+    adminId,
+    {
+      $set: {
+        email,
+        password,
+        name,
+      },
+    },
+    { new: true }
+  );
+  res.status(201).json({
+    status: "success",
+    data: adminData,
   });
 });
 
 export {
   adminSignup,
   adminLogin,
+  updateAdmin,
   getAllCustomer,
   getSingleCustomer,
   getAllSeller,

@@ -1,30 +1,27 @@
 import Customer from "../models/customerModel.js";
 import { addCustomerCart } from "../controllers/cartController.js";
 import { addCustomerWishlist } from "../controllers/wishlistController.js";
-import bcrypt from "bcrypt";
 import catchAsync from "../utils/catchAsync.js";
 import jwt from "jsonwebtoken";
 import AppError from "../utils/appError.js";
 
 //customer signup
 const customerSignup = catchAsync(async (req, res, next) => {
-  const { name, email, password, number } = req.body;
-  if (!email || !password || !name || !number) {
+  const { email, password, name, confirmPassword } = req.body;
+  if (!email || !password || !name || !confirmPassword) {
     return next(new AppError("Please Enter All field", 401));
   }
-  const salt = await bcrypt.genSalt(12);
-  const securePassword = await bcrypt.hash(password, salt);
+
   const customerData = await Customer.create({
-    name,
     email,
-    password: securePassword,
-    number,
+    password,
+    name,
+    confirmPassword,
   });
   // create cart and wishlist
   addCustomerCart(customerData._id);
   addCustomerWishlist(customerData._id);
-
-  const token = jwt.sign({ id: customerData._id }, process.env.SECRET_KEY_CUS, {
+  const token = jwt.sign({ id: customerData._id }, process.env.SECRET_KEY, {
     expiresIn: "7d",
   });
   res.status(201).json({
@@ -34,15 +31,16 @@ const customerSignup = catchAsync(async (req, res, next) => {
 });
 
 // customer login
+
 const customerLogin = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return next(new AppError("Please Enter Email or Password", 401));
   }
-  const customerData = await Customer.findOne({ email });
+  const customerData = await Customer.findOne({ email }).select("+password");
   if (
     !customerData ||
-    (await bcrypt.compare(password, customerData.password))
+    !(await customerData.securePassword(password, customerData.password))
   ) {
     return next(new AppError("email or password not match", 401));
   }
@@ -70,4 +68,16 @@ const getHistory = catchAsync(async (req, res, next) => {
   });
 });
 
-export { customerSignup, customerLogin, getHistory };
+const getSingleCustomer = catchAsync(async (req, res, next) => {
+  const customerId = req.params.customerId;
+  const customerData = await Customer.findById(customerId);
+  if (!customerData) {
+    return new AppError(`No Customer found with this Id`, 401);
+  }
+  res.status(201).json({
+    status: "success",
+    data: customerData,
+  });
+});
+
+export { customerSignup, customerLogin, getHistory, getSingleCustomer };

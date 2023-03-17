@@ -4,6 +4,7 @@ import {
   customerSignup,
   customerLogin,
   getHistory,
+  getSingleCustomer,
 } from "../controllers/customerController.js";
 
 import {
@@ -21,6 +22,7 @@ import {
 const router = express.Router();
 
 // cart route
+router.route("/:customerId").get(getSingleCustomer);
 router.route("/:customerId/cart").get(getCustomerCart);
 router.route("/:customerId/cart/:productId").put(updateCustomerCart);
 router

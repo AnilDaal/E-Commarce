@@ -1,6 +1,6 @@
 import Wishlist from "../models/wishlistModel.js";
-import Product from "../models/productModel.js";
 import catchAsync from "../utils/catchAsync.js";
+import AppError from "../utils/appError.js";
 
 // Customer Wishlist
 const getCustomerWishlist = catchAsync(async (req, res, next) => {
