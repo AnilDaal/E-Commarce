@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 mongoose.set("strictQuery", true);
-mongoose.connect("mongodb://localhost:27017/customer", () => {
+mongoose.connect("mongodb://127.0.0.1:27017/customer", () => {
   console.log("mongoose connect successfully");
 });
 
@@ -32,7 +32,7 @@ const jsonD = JSON.parse(
 
 const importData = async () => {
   const data = await Customer.insertMany(jsonD);
-  await data.save();
+  // await data.save();
   console.log("Data scuccess fully enter in the database");
   process.exit();
 };
