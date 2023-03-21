@@ -44,4 +44,7 @@ router.route("/signup").post(customerSignup);
 // login route
 router.route("/login").post(customerLogin);
 
+// reset password or forget password
+router.route("/forgetpassword").post(forgetPassword);
+
 export default router;

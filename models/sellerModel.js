@@ -11,9 +11,11 @@ const sellerSchema = new Schema({
     required: [true, "Email must be required"],
     lowercase: true,
   },
-  isAdmin: { type: Boolean, default: false },
-  isSeller: { type: Boolean, default: true },
-  isCustomer: { type: Boolean, default: false },
+  roles: {
+    type: String,
+    enum: ["admin", "seller", "customer"],
+    default: "seller",
+  },
   pancard: String,
   adharcard: String,
   number: String,
@@ -36,7 +38,7 @@ const sellerSchema = new Schema({
     },
   },
   isVerified: { type: Boolean, default: false },
-  date_added: { type: Date, default: Date.now(), select: false },
+  passwordChangeAt: { type: Date, default: Date.now(), select: false },
 });
 
 sellerSchema.pre("save", async function (next) {
@@ -49,11 +51,18 @@ sellerSchema.pre("save", async function (next) {
   next();
 });
 
-sellerSchema.methods.securePassword = async function (
+sellerSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+sellerSchema.methods.changePassword = function (timeStamp) {
+  if (this.passwordChangeAt) {
+    console.log(this.passwordChangeAt.toTime());
+    // return this.passwordChangeAt.toTime() < timeStamp
+  }
 };
 
 const Seller = mongoose.model("Seller", sellerSchema);

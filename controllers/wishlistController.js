@@ -75,9 +75,30 @@ const deleteItemCustomerWishlist = catchAsync(async (req, res, next) => {
   });
 });
 
+const addItemPublicWishlist = catchAsync(async (req, res, next) => {
+  // const { customerId, productId } = req.body;
+  // const wishlistData = await Wishlist.findByIdAndUpdate(
+  //   customerId,
+  //   {
+  //     $push: {
+  //       productId,
+  //     },
+  //   },
+  //   { new: true }
+  // );
+  // res.status(201).json({
+  //   status: "success",
+  //   data: wishlistData,
+  // });
+  res.status(401).json({
+    message: "Route not define yet",
+  });
+});
+
 export {
   getCustomerWishlist,
   addCustomerWishlist,
   updateCustomerWishlist,
   deleteItemCustomerWishlist,
+  addItemPublicWishlist,
 };

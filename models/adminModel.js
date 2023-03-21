@@ -13,9 +13,11 @@ const adminSchema = new mongoose.Schema({
     required: [true, "Email must be required"],
     lowercase: true,
   },
-  isAdmin: { type: Boolean, default: true },
-  isSeller: { type: Boolean, default: false },
-  isCustomer: { type: Boolean, default: false },
+  roles: {
+    type: String,
+    enum: ["admin", "seller", "customer"],
+    default: "admin",
+  },
   required: [false, "Please confirm your password"],
 
   password: {
@@ -35,6 +37,9 @@ const adminSchema = new mongoose.Schema({
       message: "Password not match",
     },
   },
+  updatePassword: {
+    type: Date,
+  },
 });
 
 adminSchema.pre("save", async function (next) {
@@ -42,16 +47,26 @@ adminSchema.pre("save", async function (next) {
     return next();
   }
   const salt = await bcrypt.genSalt(12);
+  // this.updatePassword = new Date().toJSON();
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
   next();
 });
 
-adminSchema.methods.securePassword = async function (
+adminSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+adminSchema.methods.changePassword = async function (timeStamp) {
+  if (this.updatePassword) {
+    const time = parseInt(this.updatePassword.getTime() / 1000, 10);
+    console.log(time, timeStamp);
+    return time > timeStamp;
+  }
+  return false;
 };
 
 const Admin = mongoose.model("Admin", adminSchema);

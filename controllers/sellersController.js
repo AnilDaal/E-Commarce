@@ -53,7 +53,7 @@ const SellerLogin = catchAsync(async (req, res, next) => {
   const sellerData = await Seller.findOne({ email }).select("+password");
   if (
     !sellerData &&
-    !(await sellerData.securePassword(password, sellerData.password))
+    !(await sellerData.correctPassword(password, sellerData.password))
   ) {
     return next(new AppError("email or password not match", 401));
   }
@@ -70,79 +70,48 @@ const SellerLogin = catchAsync(async (req, res, next) => {
     data: token,
   });
 });
+// Sellers Controllers
 
-// product
+const getAllSeller = catchAsync(async (req, res, next) => {
+  const sellerData = await Seller.find();
+  if (!sellerData) {
+    return next(new AppError("no seller found", 400));
+  }
+  return res.status(201).json({
+    status: "success",
+    results: sellerData.length,
+    data: sellerData,
+  });
+});
 
-const getProduct = catchAsync(async (req, res, next) => {
+const getSingleSeller = catchAsync(async (req, res, next) => {
+  const sellerId = req.params.id;
+  const sellerData = await Seller.findById(sellerId);
+  if (!sellerData) {
+    return next(new AppError("No Seller found with this Id", 400));
+  }
+  res.status(201).json({
+    status: "success",
+    data: sellerData,
+  });
+});
+
+const deleteSeller = catchAsync(async (req, res, next) => {
   const sellerId = req.params.sellerId;
-  const productData = await Product.find({ sellerId });
-  // find the seller using id and after all find the product list in the seller and show all of them
-  if (!productData) {
-    return next(new AppError(" No Product found with this Id", 401));
+  const sellerData = await Seller.findByIdAndDelete(sellerId);
+  if (!sellerData) {
+    return next(new AppError("No Seller found with this Id", 400));
   }
   res.status(201).json({
     status: "success",
-    results: productData.length,
-    data: productData,
-  });
-});
-
-const addProduct = catchAsync(async (req, res, next) => {
-  const sellerId = req.params.sellerId;
-  const { title, description, category, price, image } = req.body;
-  if (!title || !description || !category || !price || image) {
-    return next(new AppError("please fill all field", 401));
-  }
-  const productData = await Product.create({ ...req.body, sellerId });
-  // productData._id = sellerId;
-  res.status(201).json({
-    status: "success",
-    data: productData,
-  });
-});
-
-const updateProduct = catchAsync(async (req, res, next) => {
-  const { sellerId, productId } = req.params;
-  const { title, description, category, price, image } = req.body;
-  const productData = await Product.findByIdAndUpdate(
-    productId,
-    {
-      $set: {
-        title,
-        description,
-        category,
-        price,
-        image,
-      },
-    },
-    { new: true }
-  );
-  if (!productData) {
-    return next(new AppError("No Product found with this Id", 401));
-  }
-  res.status(201).json({
-    status: "success",
-    data: productData,
-  });
-});
-
-const deleteProduct = catchAsync(async (req, res, next) => {
-  const { sellerId, productId } = req.params;
-  const productData = await Product.findByIdAndDelete(productId);
-  if (!productData) {
-    return next(new AppError("No Product found with this Id", 401));
-  }
-  res.status(201).json({
-    status: "success",
-    data: productData,
+    data: sellerData,
   });
 });
 
 export {
   SellerSignup,
   SellerLogin,
-  getProduct,
-  addProduct,
-  updateProduct,
-  deleteProduct,
+  getAllSeller,
+  deleteSeller,
+  getSingleSeller,
 };

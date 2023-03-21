@@ -74,9 +74,40 @@ const deleteItemCustomerCart = catchAsync(async (req, res, next) => {
   });
 });
 
+const addItemPublicCart = catchAsync(async (req, res, next) => {
+  // const { customerId, productId } = req.body;
+  // const cartData = await Cart.findByIdAndUpdate(
+  //   customerId,
+  //   {
+  //     $push: {
+  //       productId,
+  //     },
+  //   },
+  //   { new: true }
+  // );
+  // res.status(201).json({
+  //   status: "success",
+  //   data: cartData,
+  // });
+  res.status(401).json({
+    message: "Route not define yet",
+  });
+});
+// const getPublicWishlist = async (req, res,next) => {
+//   try {
+//     // add product in local storage in the browser and access in the brower without login
+//   } catch (error) {
+//     res.status(401).json({
+//       status: "failed",
+//       message: error.message,
+//     });
+//   }
+// };
+
 export {
   getCustomerCart,
   addCustomerCart,
   updateCustomerCart,
   deleteItemCustomerCart,
+  addItemPublicCart,
 };

@@ -12,9 +12,11 @@ const customerSchema = new mongoose.Schema({
     required: [true, "Email must be required"],
     lowercase: true,
   },
-  isAdmin: { type: Boolean, default: false },
-  isSeller: { type: Boolean, default: false },
-  isCustomer: { type: Boolean, default: true },
+  roles: {
+    type: String,
+    enum: ["admin", "seller", "customer"],
+    default: "customer",
+  },
   password: {
     type: String,
     required: [true, "Please confirm your password"],
@@ -59,7 +61,7 @@ customerSchema.pre("save", async function (next) {
   next();
 });
 
-customerSchema.methods.securePassword = async function (
+customerSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword
 ) {

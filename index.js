@@ -15,22 +15,22 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 // uncaughtException
-// process.on("uncaughtException", (err) => {
-//   console.log("UNHANDLED Exception! Shutting down...");
-//   console.log(err.name, err.message);
-//   server.close(() => {
-//     process.exit(1);
-//   });
-// });
+process.on("uncaughtException", (err) => {
+  console.log("UNHANDLED Exception! Shutting down...");
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
+});
 
-// // unhandled Rejection
-// process.on("unhandledRejection", (err) => {
-//   console.log("UNHANDLED REJECTION! Shutting down...");
-//   console.log(err.name, err.message);
-//   server.close(() => {
-//     process.exit(1);
-//   });
-// });
+// unhandled Rejection
+process.on("unhandledRejection", (err) => {
+  console.log("UNHANDLED REJECTION! Shutting down...");
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
+});
 
 app.use(cors());
 app.use(morgan("dev"));
