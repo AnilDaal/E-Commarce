@@ -15,7 +15,7 @@ const verifyKyc = catchAsync(async (req, res, next) => {
         isVerified: true,
       },
     },
-    { new: true }
+    { new: true, runValidators: false }
   );
   if (!sellerData) {
     return next(new AppError("No Seller found with this Id", 401));
@@ -33,15 +33,20 @@ const adminSignup = catchAsync(async (req, res, next) => {
   if (!email || !password || !name || !confirmPassword) {
     return next(new AppError("Please Enter All field", 401));
   }
-  const adminData = await Admin.create({
+  const adminData = new Admin({
     email,
     password,
     confirmPassword,
     name,
   });
-  const token = jwt.sign({ id: adminData._id }, process.env.SECRET_KEY, {
-    expiresIn: "7d",
-  });
+  await adminData.save();
+  const token = jwt.sign(
+    { id: adminData._id, role: adminData.roles },
+    process.env.SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
   res.status(201).json({
     status: "success",
     token,
@@ -60,9 +65,13 @@ const adminLogin = catchAsync(async (req, res, next) => {
   ) {
     return next(new AppError("invalid email or password", 401));
   }
-  const token = jwt.sign({ id: adminData._id }, process.env.SECRET_KEY, {
-    expiresIn: "7d",
-  });
+  const token = jwt.sign(
+    { id: adminData._id, role: adminData.roles },
+    process.env.SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
 
   res.status(201).json({
     status: "success",
@@ -74,7 +83,7 @@ const updateAdmin = catchAsync(async (req, res, next) => {
   const { email, name } = req.body;
   const adminId = req.user._id;
   if (!adminId) {
-    return next("Can't find admin id", 401);
+    return next("Please Login or Signup", 401);
   }
   const adminData = await Admin.findByIdAndUpdate(
     adminId,
@@ -92,4 +101,53 @@ const updateAdmin = catchAsync(async (req, res, next) => {
   });
 });
 
-export { adminSignup, adminLogin, updateAdmin, verifyKyc };
+const updateAdminPassword = catchAsync(async (req, res, next) => {
+  const { currentPass, password, confirmPassword } = req.body;
+  const adminId = req.user._id;
+  if (!adminId) {
+    return next("Please Login or Signup", 401);
+  }
+  const adminData = await Admin.find(adminId);
+  if (!adminData.currentPassword(currentPass, adminData.password)) {
+    return next(new AppError("Please Enter Correct Password", 401));
+  }
+  await adminData.save();
+  res.status(201).json({
+    status: "success",
+    data: adminData,
+  });
+});
+
+const forgetPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return next(new AppError("Please enter email ", 401));
+  }
+  // check user existed or not
+  const adminData = await Admin.findOne({ email });
+  if (!adminData) {
+    return next(new AppError("User not found with this id", 404));
+  }
+});
+
+const resetPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return next(new AppError("Please enter email ", 401));
+  }
+  // check user existed or not
+  const adminData = await Admin.findOne({ email });
+  if (!adminData) {
+    return next(new AppError("User not found with this id", 404));
+  }
+});
+
+export {
+  adminSignup,
+  adminLogin,
+  updateAdmin,
+  updateAdminPassword,
+  verifyKyc,
+  resetPassword,
+  forgetPassword,
+};

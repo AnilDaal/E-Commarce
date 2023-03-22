@@ -5,8 +5,6 @@ import catchAsync from "../utils/catchAsync.js";
 import jwt from "jsonwebtoken";
 import AppError from "../utils/appError.js";
 
-// Customer Controller
-
 //customer signup
 const customerSignup = catchAsync(async (req, res, next) => {
   const { email, password, name, confirmPassword } = req.body;
@@ -23,10 +21,14 @@ const customerSignup = catchAsync(async (req, res, next) => {
   // create cart and wishlist
   addCustomerCart(customerData._id);
   addCustomerWishlist(customerData._id);
-  const token = jwt.sign({ id: customerData._id }, process.env.SECRET_KEY, {
-    expiresIn: "7d",
-  });
-  res.status(201).json({
+  const token = jwt.sign(
+    { id: customerData._id, role: customerData.role },
+    process.env.SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
+  res.status(200).json({
     status: "success",
     token,
   });
@@ -44,11 +46,14 @@ const customerLogin = catchAsync(async (req, res, next) => {
   ) {
     return next(new AppError("email or password not match", 401));
   }
-  const token = jwt.sign({ id: customerData._id }, process.env.SECRET_KEY_CUS, {
-    expiresIn: "7d",
-  });
-
-  res.status(201).json({
+  const token = jwt.sign(
+    { id: customerData._id, role: customerData.role },
+    process.env.SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
+  res.status(200).json({
     status: "success",
     token,
   });
@@ -56,9 +61,6 @@ const customerLogin = catchAsync(async (req, res, next) => {
 
 const getAllCustomer = catchAsync(async (req, res, next) => {
   const customerData = await Customer.find();
-  if (!customerData) {
-    return next(new AppError("customer not found", 401));
-  }
   res.status(201).json({
     status: "success",
     results: customerData.length,
@@ -93,13 +95,14 @@ const deleteCustomer = catchAsync(async (req, res, next) => {
 // get history
 const getHistory = catchAsync(async (req, res, next) => {
   const customerId = req.params.id;
-  const customerData = await Order.findById(customerId);
+  const customerData = await Order.find(customerId);
   // update order schema and
   if (!customerData) {
-    return res.status(401).json({ status: "failed", data: customerData });
+    return new AppError(`No Order found with this Id`, 401);
   }
   res.status(201).json({
     status: "success",
+    results: customerData.length,
     data: customerData,
   });
 });
@@ -109,10 +112,61 @@ const forgetPassword = catchAsync(async (req, res, next) => {
     return next(new AppError("Please enter email ", 401));
   }
   // check user existed or not
-  const userData = await Customer.findOne({ email });
-  if (!userData) {
+  const customerData = await Customer.findOne({ email });
+  if (!customerData) {
     return next(new AppError("User not found with this id", 404));
   }
+});
+
+const resetPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return next(new AppError("Please enter email ", 401));
+  }
+  // check user existed or not
+  const customerData = await Customer.findOne({ email });
+  if (!customerData) {
+    return next(new AppError("User not found with this id", 404));
+  }
+});
+
+const updateCustomer = catchAsync(async (req, res, next) => {
+  const { email, name } = req.body;
+  const customerId = req.user._id;
+  if (!customerId) {
+    return next("Please Login or Signup", 401);
+  }
+  const customerData = await Customer.findByIdAndUpdate(
+    customerId,
+    {
+      $set: {
+        email,
+        name,
+      },
+    },
+    { new: true }
+  );
+  res.status(201).json({
+    status: "success",
+    data: customerData,
+  });
+});
+
+const updateCustomerPassword = catchAsync(async (req, res, next) => {
+  const { currentPass, password, confirmPassword } = req.body;
+  const customerId = req.user._id;
+  if (!customerId) {
+    return next("Please Login or Signup", 401);
+  }
+  const customerData = await Customer.find(customerId);
+  if (!customerData.currentPassword(currentPass, customerData.password)) {
+    return next(new AppError("Please Enter Correct Password", 401));
+  }
+  await customerData.save();
+  res.status(201).json({
+    status: "success",
+    data: customerData,
+  });
 });
 
 export {
@@ -122,4 +176,8 @@ export {
   getSingleCustomer,
   getAllCustomer,
   deleteCustomer,
+  updateCustomer,
+  updateCustomerPassword,
+  resetPassword,
+  forgetPassword,
 };

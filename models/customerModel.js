@@ -4,6 +4,7 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 
 const customerSchema = new mongoose.Schema({
+  _id: mongoose.Schema.Types.ObjectId,
   name: String,
   email: {
     type: String,
@@ -34,6 +35,9 @@ const customerSchema = new mongoose.Schema({
       message: "Password not match",
     },
   },
+  passwordChangeAt: {
+    type: Date,
+  },
   number: String,
   wishlist: [
     {
@@ -56,6 +60,7 @@ customerSchema.pre("save", async function (next) {
     return next();
   }
   const salt = await bcrypt.genSalt(12);
+  this.passwordChangeAt = Date.now() - 1000;
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
   next();
@@ -66,6 +71,14 @@ customerSchema.methods.correctPassword = async function (
   userPassword
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+customerSchema.methods.updatePassword = async function (timeStamp) {
+  if (this.passwordChangeAt) {
+    const time = parseInt(this.passwordChangeAt.getTime() / 1000, 10);
+    return time > timeStamp;
+  }
+  return false;
 };
 
 const Customer = mongoose.model("Customer", customerSchema);

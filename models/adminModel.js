@@ -37,7 +37,7 @@ const adminSchema = new mongoose.Schema({
       message: "Password not match",
     },
   },
-  updatePassword: {
+  passwordChangeAt: {
     type: Date,
   },
 });
@@ -47,7 +47,7 @@ adminSchema.pre("save", async function (next) {
     return next();
   }
   const salt = await bcrypt.genSalt(12);
-  // this.updatePassword = new Date().toJSON();
+  this.passwordChangeAt = Date.now() - 2000;
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
   next();
@@ -61,9 +61,8 @@ adminSchema.methods.correctPassword = async function (
 };
 
 adminSchema.methods.changePassword = async function (timeStamp) {
-  if (this.updatePassword) {
-    const time = parseInt(this.updatePassword.getTime() / 1000, 10);
-    console.log(time, timeStamp);
+  if (this.passwordChangeAt) {
+    const time = parseInt(this.passwordChangeAt.getTime() / 1000, 10);
     return time > timeStamp;
   }
   return false;

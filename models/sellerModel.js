@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import validator from "validator";
+import crypto from "crypto";
 
 const sellerSchema = new Schema({
   name: { type: String, require: [true, "seller must have name"] },
@@ -38,7 +39,9 @@ const sellerSchema = new Schema({
     },
   },
   isVerified: { type: Boolean, default: false },
-  passwordChangeAt: { type: Date, default: Date.now(), select: false },
+  passwordChangeAt: { type: Date },
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 sellerSchema.pre("save", async function (next) {
@@ -46,9 +49,14 @@ sellerSchema.pre("save", async function (next) {
     return next();
   }
   const salt = await bcrypt.genSalt(12);
+  this.passwordChangeAt = Date.now() - 1000;
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
   next();
+});
+
+sellerSchema.post(/^find/, function () {
+  this.find({ isVerified: { $ne: false } });
 });
 
 sellerSchema.methods.correctPassword = async function (
@@ -60,9 +68,21 @@ sellerSchema.methods.correctPassword = async function (
 
 sellerSchema.methods.changePassword = function (timeStamp) {
   if (this.passwordChangeAt) {
-    console.log(this.passwordChangeAt.toTime());
-    // return this.passwordChangeAt.toTime() < timeStamp
+    const time = parseInt(this.passwordChangeAt.getTime() / 1000, 10);
+    return time > timeStamp;
   }
+  return false;
+};
+
+sellerSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  console.log(resetToken, this.passwordResetToken);
+  return resetToken;
 };
 
 const Seller = mongoose.model("Seller", sellerSchema);

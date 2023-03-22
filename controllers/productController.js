@@ -1,19 +1,5 @@
 import catchAsync from "../utils/catchAsync.js";
 
-const getSellerProduct = catchAsync(async (req, res, next) => {
-  const sellerId = req.params.sellerId;
-  const productData = await Product.find({ sellerId });
-  // find the seller using id and after all find the product list in the seller and show all of them
-  if (!productData) {
-    return next(new AppError(" No Product found with this Id", 401));
-  }
-  res.status(201).json({
-    status: "success",
-    results: productData.length,
-    data: productData,
-  });
-});
-
 const addProduct = catchAsync(async (req, res, next) => {
   const sellerId = req.params.sellerId;
   const { title, description, category, price, image } = req.body;
@@ -85,7 +71,6 @@ const getSingleProduct = catchAsync(async (req, res, next) => {
 });
 
 export {
-  getSellerProduct,
   addProduct,
   updateProduct,
   deleteProduct,
