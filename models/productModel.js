@@ -1,10 +1,10 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
   title: {
     type: String,
-    minlength: 10,
-    require: [true, 'product must have title'],
+    minlength: [8, "product have more than 8 charchter title"],
+    require: [true, "product must have title"],
   },
   sellerId: String,
   description: {
@@ -12,7 +12,7 @@ const productSchema = new mongoose.Schema({
 
     minlength: 10,
   },
-  short_description: {
+  details: {
     type: String,
   },
   stock: { type: Boolean, default: true },
@@ -20,20 +20,20 @@ const productSchema = new mongoose.Schema({
   quantity: {
     type: Number,
     min: 1,
-    require: [true, 'product must have quantity'],
+    require: [true, "product must have quantity"],
   },
   sale_price: String,
-  price: { type: String, require: [true, 'product must have price'] },
+  price: { type: String, require: [true, "product must have price"] },
   date_added: {
     type: Date,
     default: Date.now(),
   },
   image: {
     type: String,
-    require: [true, 'product must have image'],
+    require: [true, "product must have image"],
   },
 });
 
-const Product = mongoose.model('Product', productSchema);
+const Product = mongoose.model("Product", productSchema);
 
 export default Product;

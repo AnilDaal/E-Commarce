@@ -10,6 +10,7 @@ import AppError from "./utils/appError.js";
 import globelErrorHandling from "./controllers/errorController.js";
 import adminRoute from "./routes/adminRoute.js";
 
+console.log(process.env.ECOM);
 dotenv.config({ path: "./.env" });
 const app = express();
 const port = process.env.PORT || 8000;

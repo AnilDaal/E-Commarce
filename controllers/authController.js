@@ -7,9 +7,19 @@ import Seller from "../models/sellerModel.js";
 import Customer from "../models/customerModel.js";
 
 const authUser = catchAsync(async (req, res, next) => {
-  let token = req.headers.authorization.startsWith("Bearer")
-    ? req.headers.authorization.split(" ")[1]
-    : null;
+  if (
+    !req.headers.authorization ||
+    !req.headers.authorization.startsWith("Bearer") ||
+    !req.headers.authorization.split(" ")[1]
+  ) {
+    return next(
+      new AppError(
+        "token not found or token not start with Bearer or token is null",
+        401
+      )
+    );
+  }
+  const token = req.headers.authorization.split(" ")[1];
   if (token) {
     let tokenData = await promisify(jwt.verify)(token, process.env.SECRET_KEY);
     console.log(tokenData);
@@ -54,8 +64,6 @@ const authUser = catchAsync(async (req, res, next) => {
       );
     }
     req.user = freshData;
-  } else {
-    return next(new AppError("token not found", 401));
   }
   next();
 });

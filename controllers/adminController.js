@@ -22,6 +22,12 @@ const verifyKyc = catchAsync(async (req, res, next) => {
   if (!sellerData) {
     return next(new AppError("No Seller found with this Id", 401));
   }
+  const message = "Congratulation you are verified";
+  await sendEmail({
+    email: sellerData.email,
+    subject: "You are verify please login your account",
+    message,
+  });
   res.status(201).json({
     status: "success",
     data: sellerData,
