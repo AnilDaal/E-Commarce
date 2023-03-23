@@ -40,12 +40,12 @@ router
 
 router
   .route("/:sellerId/product")
-  .get(authUser, restrictTo("seller"), getSellerProduct)
-  .post(authUser, restrictTo("seller"), addProduct);
+  .get(authUser, restrictTo("seller", "admin"), getSellerProduct)
+  .post(authUser, restrictTo("seller", "admin"), addProduct);
 
 router
   .route("/:sellerId/product/:productId")
-  .put(authUser, restrictTo("seller"), updateProduct)
+  .put(authUser, restrictTo("seller", "admin"), updateProduct)
   .delete(authUser, restrictTo("seller", "admin"), deleteProduct);
 
 // signup route
