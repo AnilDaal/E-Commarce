@@ -1,15 +1,10 @@
 import mongoose from "mongoose";
 
 const reviewSchema = new mongoose.Schema({
-  userid: [
-    { type: String, unique: true },
-    //   validator:{
-    // validate:function(val){
-    //   return this.userid>val;
-    // }},message:"helo"}],
-  ],
+  userid: [{ type: mongoose.Schema.Types.ObjectId, ref: "Customer" }],
+  desc: String,
   rating: { type: Number, min: 0, max: 5 },
-  productSchema: { type: String, unique: true },
+  productSchema: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
 });
 
 const Review = mongoose.model("Review", reviewSchema);
