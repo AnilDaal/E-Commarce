@@ -28,6 +28,16 @@ import { authUser, restrictTo } from "../controllers/authController.js";
 // route middleware
 const router = express.Router();
 
+// reset password or forget password
+router
+  .route("/forgetCustomerpassword")
+  .post(authUser, restrictTo("customer"), forgetPassword);
+router.post(
+  "/resetCustomerPassword/:token",
+  authUser,
+  restrictTo("customer"),
+  resetPassword
+);
 // cart route
 router
   .route("/:customerId")
@@ -63,16 +73,6 @@ router.route("/signup").post(customerSignup);
 // login route
 router.route("/login").post(customerLogin);
 
-// reset password or forget password
-router
-  .route("/forgetCustomerpassword")
-  .post(authUser, restrictTo("customer"), forgetPassword);
-router.post(
-  "/resetCustomerPassword",
-  authUser,
-  restrictTo("customer"),
-  resetPassword
-);
 router.post(
   "/updateCustomerPassword",
   authUser,

@@ -82,13 +82,21 @@ const getSingleCustomer = catchAsync(async (req, res, next) => {
 
 const deleteCustomer = catchAsync(async (req, res, next) => {
   const customerId = req.params.customerId;
-  const customerData = await Customer.findByIdAndDelete(customerId);
+  const customerData = await Customer.findByIdAndUpdate(
+    customerId,
+    {
+      $set: {
+        accountActive: false,
+      },
+    },
+    { new: true }
+  );
   if (!customerData) {
     return new AppError(`No Customer found with this Id`, 401);
   }
   res.status(201).json({
     status: "success",
-    data: customerData,
+    data: null,
   });
 });
 

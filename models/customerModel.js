@@ -35,9 +35,9 @@ const customerSchema = new mongoose.Schema({
       message: "Password not match",
     },
   },
-  passwordChangeAt: {
-    type: Date,
-  },
+  passwordChangeAt: { type: Date },
+  passwordResetToken: String,
+  passwordResetExpires: Date,
   number: String,
   wishlist: [
     {
@@ -53,6 +53,10 @@ const customerSchema = new mongoose.Schema({
   ],
   isVerified: { type: Boolean, default: false },
   address: String,
+  accountActive: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 customerSchema.pre("save", async function (next) {
@@ -60,9 +64,16 @@ customerSchema.pre("save", async function (next) {
     return next();
   }
   const salt = await bcrypt.genSalt(12);
-  this.passwordChangeAt = Date.now() - 1000;
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
+  next();
+});
+
+customerSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) {
+    return next();
+  }
+  this.passwordChangeAt = Date.now() - 1000;
   next();
 });
 

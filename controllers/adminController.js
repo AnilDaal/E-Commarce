@@ -3,6 +3,8 @@ import Seller from "../models/sellerModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import sendEmail from "../utils/email.js";
 
 // Sellers Kyc
 
@@ -128,18 +130,80 @@ const forgetPassword = catchAsync(async (req, res, next) => {
   if (!adminData) {
     return next(new AppError("User not found with this id", 404));
   }
+  // 3) Create token and add in the data base
+  const resetToken = adminData.createPasswordReseoken();
+  // 4) validateBeforeSave:false
+  await adminData.save({ validateBeforeSave: false });
+  // 5) send mail
+  const resetURL = `${req.protocol}://${req.get(
+    "host"
+  )}/api/v1/admin/resetPassword/${resetToken}`;
+  const message = `forget your password \n  passwordConfirm to:${resetURL}.If you din't forget your password please ignore this email!`;
+
+  try {
+    await sendEmail({
+      email,
+      subject: "Your password reset token(valid for 10 min)",
+      message,
+    });
+    res.status(200).json({
+      status: "success",
+      message: "Token sent to email",
+    });
+  } catch (err) {
+    adminData.passwordResetToken = undefined;
+    adminData.passwordResetExpires = undefined;
+    await adminData.save({ validateBeforeSave: false });
+    return next(
+      new AppError(
+        "There was an error sending the email. Try again later!",
+        500
+      )
+    );
+  }
 });
 
 const resetPassword = catchAsync(async (req, res, next) => {
-  const { email } = req.body;
-  if (!email) {
-    return next(new AppError("Please enter email ", 401));
+  const { password, confirmPassword } = req.body;
+  if (!password || !confirmPassword) {
+    return next(
+      new AppError("Please enter password and confirm password", 401)
+    );
+  }
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  const adminData = await Admin.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpire: { $gt: Date.now() },
+  });
+  if (!adminData) {
+    return next(new AppError("Token was expire or invalid ", 401));
   }
   // check user existed or not
-  const adminData = await Admin.findOne({ email });
   if (!adminData) {
     return next(new AppError("User not found with this id", 404));
   }
+  adminData.password = password;
+  adminData.confirmPassword = confirmPassword;
+  adminData.passwordResetToken = undefined;
+  adminData.passwordResetExpires = undefined;
+  await adminData.save();
+  // 3) update password update
+
+  // 4) Signin user
+  const token = jwt.sign(
+    { id: adminData._id, role: adminData.roles },
+    process.env.SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
+  res.status(201).json({
+    status: "success",
+    token,
+  });
 });
 
 export {

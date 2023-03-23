@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const adminSchema = new mongoose.Schema({
   name: {
@@ -37,9 +38,9 @@ const adminSchema = new mongoose.Schema({
       message: "Password not match",
     },
   },
-  passwordChangeAt: {
-    type: Date,
-  },
+  passwordChangeAt: { type: Date },
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 adminSchema.pre("save", async function (next) {
@@ -50,6 +51,14 @@ adminSchema.pre("save", async function (next) {
   this.passwordChangeAt = Date.now() - 2000;
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
+  next();
+});
+
+adminSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) {
+    return next();
+  }
+  this.passwordChangeAt = Date.now() - 1000;
   next();
 });
 
@@ -68,5 +77,14 @@ adminSchema.methods.changePassword = async function (timeStamp) {
   return false;
 };
 
+adminSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  return resetToken;
+};
 const Admin = mongoose.model("Admin", adminSchema);
 export default Admin;

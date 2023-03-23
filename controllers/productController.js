@@ -1,4 +1,5 @@
 import catchAsync from "../utils/catchAsync.js";
+import Product from "../models/productModel.js";
 
 const addProduct = catchAsync(async (req, res, next) => {
   const sellerId = req.params.sellerId;

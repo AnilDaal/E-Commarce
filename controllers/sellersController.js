@@ -3,6 +3,8 @@ import Product from "../models/productModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import jwt from "jsonwebtoken";
 import AppError from "../utils/appError.js";
+import sendEmail from "../utils/email.js";
+import crypto from "crypto";
 
 // seller signup
 const SellerSignup = catchAsync(async (req, res, next) => {
@@ -37,17 +39,10 @@ const SellerSignup = catchAsync(async (req, res, next) => {
     password,
     confirmPassword,
   });
-  const token = jwt.sign(
-    { id: sellerData._id, role: sellerData.roles },
-    process.env.SECRET_KEY,
-    {
-      expiresIn: "7d",
-    }
-  );
 
   res.status(201).json({
     status: "success",
-    token,
+    data: sellerData,
   });
 });
 
@@ -107,30 +102,67 @@ const getSingleSeller = catchAsync(async (req, res, next) => {
 });
 
 const deleteSeller = catchAsync(async (req, res, next) => {
-  const sellerId = req.params.sellerId;
-  const sellerData = await Seller.findByIdAndDelete(sellerId);
+  const sellerId = req.user._id;
+  const sellerData = await Seller.findByIdAndUpdate(
+    sellerId,
+    {
+      $set: {
+        accountActive: false,
+      },
+    },
+    { new: true }
+  );
   if (!sellerData) {
     return next(new AppError("No Seller found with this Id", 400));
   }
   res.status(201).json({
     status: "success",
-    data: sellerData,
+    data: null,
   });
 });
 
-const forgetPassword = catchAsync(async (req, res, next) => {
-  const { email } = req.body;
-  if (!email) {
-    return next(new AppError("Please enter email ", 401));
+const resetPassword = catchAsync(async (req, res, next) => {
+  // 1) Get user based on the token
+  const { password, confirmPassword } = req.body;
+  if (!password || !confirmPassword) {
+    return next(
+      new AppError("Please enter password and confirm password", 401)
+    );
   }
-  // check user existed or not
-  const sellerData = await Seller.findOne({ email });
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  // 2) check user existed or not and token is not expire
+  const sellerData = await Seller.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
   if (!sellerData) {
-    return next(new AppError("User not found with this id", 404));
+    return next(new AppError("Token was expire or invalid", 404));
   }
+  sellerData.password = password;
+  sellerData.confirmPassword = confirmPassword;
+  sellerData.passwordResetToken = undefined;
+  sellerData.passwordResetExpires = undefined;
+  await sellerData.save();
+  // 3) update password update
+
+  // 4) Signin user
+  const token = jwt.sign(
+    { id: sellerData._id, role: sellerData.roles },
+    process.env.SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
+  res.status(201).json({
+    status: "success",
+    token,
+  });
 });
 
-const resetPassword = catchAsync(async (req, res, next) => {
+const forgetPassword = async (req, res, next) => {
   const { email } = req.body;
   if (!email) {
     return next(new AppError("Please enter email ", 401));
@@ -143,8 +175,37 @@ const resetPassword = catchAsync(async (req, res, next) => {
   // 2) Generate the random reset token
   const resetToken = sellerData.createPasswordResetToken();
   // validateBeforeSave: flase
-  await sellerData.save();
-});
+  await sellerData.save({ validateBeforeSave: false });
+  // 3) Send email
+  const resetURL = `${req.protocol}://${req.get(
+    "host"
+  )}/api/v1/users/resetPassword/${resetToken}`;
+  const message = `forget your password? \n passwordConfirm to:${resetURL}.If you din't forget your password please ignore this email!`;
+
+  try {
+    const options = {
+      email,
+      subject: "your password reset token (valid for 10 min)",
+      message,
+    };
+    await sendEmail(options);
+
+    res.status(200).json({
+      status: "success",
+      message: "Token sent to email",
+    });
+  } catch (error) {
+    sellerData.passwordResetToken = undefined;
+    sellerData.passwordResetExpires = undefined;
+    await sellerData.save({ validateBeforeSave: false });
+    return next(
+      new AppError(
+        "There was an error sending the email. Try again later!",
+        500
+      )
+    );
+  }
+};
 
 const updateSeller = catchAsync(async (req, res, next) => {
   const { email, name } = req.body;
@@ -174,9 +235,7 @@ const updateSellerPassword = catchAsync(async (req, res, next) => {
   if (!sellerId) {
     return next("Please Login or Signup", 401);
   }
-  console.log("help");
-  const sellerData = await Seller.findById(sellerId);
-  console.log(sellerData);
+  const sellerData = await Seller.findById(sellerId).select("+password");
   if (
     !sellerData ||
     !(await sellerData.correctPassword(password, sellerData.password))

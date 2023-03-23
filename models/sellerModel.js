@@ -42,6 +42,10 @@ const sellerSchema = new Schema({
   passwordChangeAt: { type: Date },
   passwordResetToken: String,
   passwordResetExpires: Date,
+  accountActive: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 sellerSchema.pre("save", async function (next) {
@@ -49,12 +53,19 @@ sellerSchema.pre("save", async function (next) {
     return next();
   }
   const salt = await bcrypt.genSalt(12);
-  this.passwordChangeAt = Date.now() - 1000;
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
   next();
 });
 
+sellerSchema.pre("save", function (next) {
+  if (!this.isModified("password") || this.isNew) {
+    return next();
+  }
+  this.passwordChangeAt = Date.now() - 1000;
+  next();
+});
+//post because admin not able to modify this
 sellerSchema.post(/^find/, function () {
   this.find({ isVerified: { $ne: false } });
 });
@@ -81,7 +92,6 @@ sellerSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest("hex");
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-  console.log(resetToken, this.passwordResetToken);
   return resetToken;
 };
 

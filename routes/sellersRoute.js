@@ -22,6 +22,17 @@ import { authUser, restrictTo } from "../controllers/authController.js";
 const router = express.Router();
 
 // product route
+
+router.put(
+  "/resetSellerPassword/:token",
+  authUser,
+  restrictTo("seller"),
+  resetPassword
+);
+router
+  .route("/forgetSellerPassword")
+  .put(authUser, restrictTo("seller"), forgetPassword);
+
 router
   .route("/:sellerId")
   .get(authUser, restrictTo("seller", "admin"), getSingleSeller)
@@ -47,13 +58,6 @@ router
   .get(authUser, restrictTo("admin"), getAllSeller)
   .put(authUser, restrictTo("seller"), updateSeller)
   .delete(authUser, restrictTo("seller", "admin"), deleteSeller);
-
-router
-  .route("/resetSellerPassword")
-  .put(authUser, restrictTo("seller"), resetPassword);
-router
-  .route("/forgetSellerPassword")
-  .put(authUser, restrictTo("seller"), forgetPassword);
 
 // kyc of sellers
 

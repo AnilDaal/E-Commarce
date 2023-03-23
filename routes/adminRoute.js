@@ -17,6 +17,18 @@ const router = express.Router();
 router.route("/login").post(adminLogin);
 router.route("/signup").post(adminSignup);
 router.route("/updateAdmin").put(authUser, restrictTo("admin"), updateAdmin);
+router.put(
+  "/resetAdminPassward/:token",
+  authUser,
+  restrictTo("admin"),
+  resetPassword
+);
+router.put(
+  "/forgetAdminPassward/:token",
+  authUser,
+  restrictTo("admin"),
+  forgetPassword
+);
 router
   .route("/updateAdminPassword")
   .put(authUser, restrictTo("admin"), updateAdminPassword);
