@@ -13,7 +13,7 @@ import {
   updateSeller,
 } from "../controllers/sellersController.js";
 import {
-  addProduct,
+  addSellerProduct,
   updateProduct,
   deleteProduct,
 } from "../controllers/productController.js";
@@ -34,17 +34,17 @@ router
   .put(authUser, restrictTo("seller"), forgetPassword);
 
 router
+  .route("/products")
+  .get(authUser, restrictTo("seller", "admin"), getSellerProduct)
+  .post(authUser, restrictTo("seller", "admin"), addSellerProduct);
+
+router
   .route("/:sellerId")
   .get(authUser, restrictTo("seller", "admin"), getSingleSeller)
   .put(authUser, restrictTo("seller"), updateSellerPassword);
 
 router
-  .route("/:sellerId/product")
-  .get(authUser, restrictTo("seller", "admin"), getSellerProduct)
-  .post(authUser, restrictTo("seller", "admin"), addProduct);
-
-router
-  .route("/:sellerId/product/:productId")
+  .route("/product/:productId")
   .put(authUser, restrictTo("seller", "admin"), updateProduct)
   .delete(authUser, restrictTo("seller", "admin"), deleteProduct);
 

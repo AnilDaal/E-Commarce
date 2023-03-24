@@ -3,7 +3,6 @@ import express from "express";
 import {
   customerSignup,
   customerLogin,
-  getHistory,
   getSingleCustomer,
   getAllCustomer,
   updateCustomer,
@@ -11,6 +10,8 @@ import {
   resetPassword,
   forgetPassword,
   deleteCustomer,
+  createReview,
+  getReview,
 } from "../controllers/customerController.js";
 
 import {
@@ -23,49 +24,44 @@ import {
   updateCustomerWishlist,
   deleteItemCustomerWishlist,
 } from "../controllers/wishlistController.js";
+import { createOrder, orderHistory } from "../controllers/orderController.js";
 import { authUser, restrictTo } from "../controllers/authController.js";
 
 // route middleware
 const router = express.Router();
 
 // reset password or forget password
+router.post("/forgetCustomerPassword", forgetPassword);
+router.post("/resetCustomerPassword/:token", resetPassword);
+
+// create order
 router
-  .route("/forgetCustomerpassword")
-  .post(authUser, restrictTo("customer"), forgetPassword);
-router.post(
-  "/resetCustomerPassword/:token",
-  authUser,
-  restrictTo("customer"),
-  resetPassword
-);
+  .route("/customerOrder")
+  .post(authUser, restrictTo("customer"), createOrder)
+  .get(authUser, restrictTo("customer"), orderHistory);
+
 // cart route
+
 router
-  .route("/:customerId")
-  .get(authUser, restrictTo("admin", "customer"), getSingleCustomer);
-router
-  .route("/:customerId/cart")
+  .route("/customerCart")
   .get(authUser, restrictTo("customer"), getCustomerCart);
 router
-  .route("/:customerId/cart/:productId")
+  .route("/customerCart/:productId")
   .put(authUser, restrictTo("customer"), updateCustomerCart);
 router
-  .route("/:customerId/deletecartitem/:productId")
+  .route("/deleteCartProduct/:productId")
   .put(authUser, restrictTo("customer"), deleteItemCustomerCart);
 
 // wishlist route
 router
-  .route("/:customerId/wishlist")
+  .route("/customerWishlist")
   .get(authUser, restrictTo("customer"), getCustomerWishlist);
 router
-  .route("/:customerId/wishlist/:productId")
+  .route("/customerWishlist/:productId")
   .put(authUser, restrictTo("customer"), updateCustomerWishlist);
 router
-  .route("/:customerId/deletewishlistitem/:productId")
+  .route("/deleteWishlistProduct/:productId")
   .put(authUser, restrictTo("customer"), deleteItemCustomerWishlist);
-// order route
-router
-  .route("/:customerId/order")
-  .get(authUser, restrictTo("customer"), getHistory);
 
 // signup route
 router.route("/signup").post(customerSignup);
@@ -79,9 +75,19 @@ router.post(
   restrictTo("customer"),
   updateCustomerPassword
 );
+
 router
   .route("/")
   .put(authUser, restrictTo("customer"), updateCustomer)
-  .get(authUser, restrictTo("admin"), getAllCustomer)
-  .delete(authUser, restrictTo("admin"), deleteCustomer);
+  .get(authUser, restrictTo("admin"), getAllCustomer);
+router
+  .route("/:customerId")
+  .delete(authUser, restrictTo("admin", "customer"), deleteCustomer)
+  .get(authUser, restrictTo("admin", "customer"), getSingleCustomer);
+// review route
+
+router
+  .route("/:productId/customerReview")
+  .post(authUser, restrictTo("customer"), createReview)
+  .get(getReview);
 export default router;

@@ -2,18 +2,15 @@ import Cart from "../models/cartModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 
-const addCustomerCart = catchAsync(async (customerId) => {
-  const cartData = await Cart.create({
+const addCustomerCart = async (customerId) => {
+  const cartData = await Cart({
     _id: customerId,
   });
-  return {
-    status: "success",
-    data: cartData,
-  };
-});
+  await cartData.save({ validateBeforeSave: false });
+};
 
 const getCustomerCart = catchAsync(async (req, res, next) => {
-  const customerId = req.params.customerId;
+  const customerId = req.user._id;
   const cartData = await Cart.findById(customerId);
   // .populate({
   //   path: "wishlist",
@@ -30,9 +27,12 @@ const getCustomerCart = catchAsync(async (req, res, next) => {
 });
 
 const updateCustomerCart = catchAsync(async (req, res, next) => {
-  const { customerId, productId } = req.params;
+  const { productId } = req.params;
+  if (!req.user._id) {
+    return next(new AppError("No user found please login or signup", 403));
+  }
   const cartData = await Cart.findByIdAndUpdate(
-    customerId,
+    req.user._id,
     {
       $push: {
         productId,
@@ -52,9 +52,12 @@ const updateCustomerCart = catchAsync(async (req, res, next) => {
   });
 });
 const deleteItemCustomerCart = catchAsync(async (req, res, next) => {
-  const { customerId, productId } = req.params;
+  const { productId } = req.params;
+  if (!req.user._id) {
+    return next(new AppError("Please login for cart changes", 403));
+  }
   const cartData = await Cart.findByIdAndUpdate(
-    customerId,
+    req.user._id,
     {
       $pull: {
         productId,
@@ -64,6 +67,7 @@ const deleteItemCustomerCart = catchAsync(async (req, res, next) => {
       new: true,
     }
   );
+  console.log(cartData);
   // update cart schema using customer schema
   if (!cartData) {
     return next(new AppError("No Cart found with this Id", 401));

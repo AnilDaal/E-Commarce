@@ -67,6 +67,7 @@ const adminLogin = catchAsync(async (req, res, next) => {
     return next(new AppError("Please enter email or password", 400));
   }
   const adminData = await Admin.findOne({ email }).select("+password");
+  console.log(adminData);
   if (
     !adminData ||
     !(await adminData.correctPassword(password, adminData.password))
@@ -88,7 +89,10 @@ const adminLogin = catchAsync(async (req, res, next) => {
 });
 
 const updateAdmin = catchAsync(async (req, res, next) => {
-  const { email, name } = req.body;
+  const { email, name, password } = req.body;
+  if (password) {
+    return next(new AppError("this route not for password update", 401));
+  }
   const adminId = req.user._id;
   if (!adminId) {
     return next("Please Login or Signup", 401);
@@ -110,22 +114,31 @@ const updateAdmin = catchAsync(async (req, res, next) => {
 });
 
 const updateAdminPassword = catchAsync(async (req, res, next) => {
-  const { currentPass, password, confirmPassword } = req.body;
+  const { currentPassword, password, confirmPassword } = req.body;
+  if (!currentPassword || !password || !confirmPassword) {
+    return next(
+      new AppError(
+        `Please enter all filed: currentPassword , password , confirmPassword `,
+        401
+      )
+    );
+  }
   const adminId = req.user._id;
   if (!adminId) {
-    return next("Please Login or Signup", 401);
+    return next(new AppError("Please Login or Signup", 401));
   }
-  const adminData = await Admin.find(adminId);
-  if (!adminData.currentPassword(currentPass, adminData.password)) {
+  const adminData = await Admin.findOne(adminId).select("+password");
+  if (!(await adminData.correctPassword(currentPassword, adminData.password))) {
     return next(new AppError("Please Enter Correct Password", 401));
   }
+  adminData.password = password;
+  adminData.confirmPassword = confirmPassword;
   await adminData.save();
   res.status(201).json({
     status: "success",
     data: adminData,
   });
 });
-
 const forgetPassword = catchAsync(async (req, res, next) => {
   const { email } = req.body;
   if (!email) {

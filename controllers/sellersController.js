@@ -90,7 +90,8 @@ const getAllSeller = catchAsync(async (req, res, next) => {
 });
 
 const getSingleSeller = catchAsync(async (req, res, next) => {
-  const sellerId = req.params.id;
+  console.log("this is single seller route");
+  const sellerId = req.params.sellerId;
   const sellerData = await Seller.findById(sellerId);
   if (!sellerData) {
     return next(new AppError("No Seller found with this Id", 400));
@@ -208,10 +209,13 @@ const forgetPassword = async (req, res, next) => {
 };
 
 const updateSeller = catchAsync(async (req, res, next) => {
-  const { email, name } = req.body;
+  const { email, name, password } = req.body;
+  if (password) {
+    return next(new AppError("this route not for password update", 401));
+  }
   const sellerId = req.user._id;
   if (!sellerId) {
-    return next("Please Login or Signup", 401);
+    return next(AppError("Please Login or Signup", 401));
   }
   const sellerData = await Seller.findByIdAndUpdate(
     sellerId,
@@ -230,37 +234,28 @@ const updateSeller = catchAsync(async (req, res, next) => {
 });
 
 const updateSellerPassword = catchAsync(async (req, res, next) => {
-  const { currentPass, password, confirmPassword } = req.body;
+  const { currentPassword, password, confirmPassword } = req.body;
   const sellerId = req.user._id;
   if (!sellerId) {
     return next("Please Login or Signup", 401);
   }
   const sellerData = await Seller.findById(sellerId).select("+password");
-  if (
-    !sellerData ||
-    !(await sellerData.correctPassword(password, sellerData.password))
-  ) {
+  console.log(currentPassword, sellerData.password);
+  if (!sellerData.correctPassword(currentPassword, sellerData.password)) {
     return next(new AppError("Please Enter Correct Password", 401));
   }
-  const updateSellerData = await Seller.findByIdAndUpdate(
-    sellerId,
-    {
-      $set: {
-        password: currentPass,
-        confirmPassword,
-      },
-    },
-    { new: true }
-  );
-  await updateSellerData.save();
+  sellerData.password = password;
+  sellerData.confirmPassword = confirmPassword;
+  await sellerData.save();
   res.status(201).json({
     status: "success",
-    data: updateSellerData,
+    data: sellerData,
   });
 });
 
 const getSellerProduct = catchAsync(async (req, res, next) => {
-  const sellerId = req.params.sellerId;
+  const sellerId = req.user._id;
+  console.log("helo");
   const productData = await Product.find({ sellerId });
   // find the seller using id and after all find the product list in the seller and show all of them
   if (!productData) {

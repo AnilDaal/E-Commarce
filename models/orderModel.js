@@ -1,19 +1,23 @@
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema({
-  email: String,
-  name: String,
-  deliverSchema: String,
-  amountSchema: String,
-  product: [
-    {
+const orderSchema = new mongoose.Schema(
+  {
+    customerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
+      ref: "Customer",
     },
-  ],
-  paymentSchema: String,
-  totalAmount: String,
-});
+    product: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
+    totalItems: { type: Number, min: 1 },
+    paymentSchema: String,
+    orderTotal: String,
+  },
+  { timestamps: true }
+);
 
-const Cart = mongoose.model("Cart", cartSchema);
-export default Cart;
+const Order = mongoose.model("Order", orderSchema);
+export default Order;

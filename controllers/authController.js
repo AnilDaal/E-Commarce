@@ -7,9 +7,6 @@ import Seller from "../models/sellerModel.js";
 import Customer from "../models/customerModel.js";
 
 const authUser = catchAsync(async (req, res, next) => {
-  console.log(req.headers.authorization);
-  console.log(req.headers.authorization.startsWith("Bearer"));
-  console.log(req.headers.authorization.split(" ")[1]);
   if (
     !req.headers.authorization ||
     !req.headers.authorization.startsWith("Bearer") ||
@@ -27,7 +24,6 @@ const authUser = catchAsync(async (req, res, next) => {
     let tokenData = await promisify(jwt.verify)(token, process.env.SECRET_KEY);
     console.log(tokenData);
     let freshData;
-
     if (tokenData.role === "admin") {
       freshData = await Admin.findById(tokenData.id);
       if (!freshData) {
@@ -48,7 +44,7 @@ const authUser = catchAsync(async (req, res, next) => {
           )
         );
       }
-    } else {
+    } else if (tokenData.role === "customer") {
       freshData = await Customer.findById(tokenData.id);
       if (!freshData) {
         return next(
@@ -58,6 +54,8 @@ const authUser = catchAsync(async (req, res, next) => {
           )
         );
       }
+    } else {
+      return next(new AppError(`Please add user role in User Data`, 401));
     }
 
     // if admin update password

@@ -12,7 +12,7 @@ const handleDuplicateFieldsDB = (err) => {
 };
 
 const handleJWTError = (err) => {
-  const message = "invalid signature";
+  const message = "invalid user token signature";
   return new AppError(message, 400);
 };
 const handleJWTExpire = (err) => {

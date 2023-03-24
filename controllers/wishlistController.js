@@ -4,8 +4,10 @@ import AppError from "../utils/appError.js";
 
 // Customer Wishlist
 const getCustomerWishlist = catchAsync(async (req, res, next) => {
-  const customerId = req.params.customerId;
-  const wishlistData = await Wishlist.findById(customerId);
+  if (!req.user._id) {
+    return next(AppError("Please Login or Signup", 401));
+  }
+  const wishlistData = await Wishlist.findById(req.user._id);
   //  get wishlist using customer schema
   if (!wishlistData) {
     return next(new AppError("No Wishlist found with this Id", 401));
@@ -16,25 +18,29 @@ const getCustomerWishlist = catchAsync(async (req, res, next) => {
   });
 });
 
-const addCustomerWishlist = catchAsync(async (customerId) => {
-  const wishlistData = await Wishlist.create({
+const addCustomerWishlist = async (customerId) => {
+  const wishlistData = await Wishlist({
     _id: customerId,
   });
+  await wishlistData.save({ validateBeforeSave: false });
   // update customer schema and add data in the wishlistcustomer
   // const addWishlist = await wishlistData.create({
   //   product: title,
   //   userid,
   // });
-  return {
-    status: "success",
-    data: wishlistData,
-  };
-});
+  // return {
+  //   status: "success",
+  //   data: wishlistData,
+  // };
+};
 
 const updateCustomerWishlist = catchAsync(async (req, res, next) => {
-  const { customerId, productId } = req.params;
+  const { productId } = req.params;
+  if (!req.user._id) {
+    return next(AppError("Please Login or Signup", 401));
+  }
   const wishlistData = await Wishlist.findByIdAndUpdate(
-    customerId,
+    req.user._id,
     {
       $push: {
         productId: productId,
@@ -54,9 +60,12 @@ const updateCustomerWishlist = catchAsync(async (req, res, next) => {
 });
 
 const deleteItemCustomerWishlist = catchAsync(async (req, res, next) => {
-  const { customerId, productId } = req.params;
+  const { productId } = req.params;
+  if (!req.user._id) {
+    return next(AppError("Please Login or Signup", 401));
+  }
   const wishlistData = await Wishlist.findByIdAndUpdate(
-    customerId,
+    req.user._id,
     {
       $pull: {
         productId: productId,

@@ -19,7 +19,6 @@ const adminSchema = new mongoose.Schema({
     enum: ["admin", "seller", "customer"],
     default: "admin",
   },
-  required: [false, "Please confirm your password"],
 
   password: {
     type: String,

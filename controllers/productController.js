@@ -1,10 +1,11 @@
 import catchAsync from "../utils/catchAsync.js";
 import Product from "../models/productModel.js";
+import AppError from "../utils/appError.js";
 
-const addProduct = catchAsync(async (req, res, next) => {
-  const sellerId = req.params.sellerId;
+const addSellerProduct = catchAsync(async (req, res, next) => {
+  const sellerId = req.user._id;
   const { title, description, category, price, image } = req.body;
-  if (!title || !description || !category || !price || image) {
+  if (!title || !description || !category || !price || !image) {
     return next(new AppError("please fill all field", 401));
   }
   const productData = await Product.create({ ...req.body, sellerId });
@@ -66,13 +67,12 @@ const getSingleProduct = catchAsync(async (req, res, next) => {
   const productData = await Product.findOne(productId);
   res.status(201).json({
     status: "succes",
-    results: productData.length,
     data: productData,
   });
 });
 
 export {
-  addProduct,
+  addSellerProduct,
   updateProduct,
   deleteProduct,
   getAllProduct,

@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import Cart from "./cartModel.js";
 import validator from "validator";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const customerSchema = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId,
   name: String,
   email: {
     type: String,
@@ -34,6 +34,7 @@ const customerSchema = new mongoose.Schema({
       },
       message: "Password not match",
     },
+    minlength: [6, "password must have more than 6 character"],
   },
   passwordChangeAt: { type: Date },
   passwordResetToken: String,
@@ -52,10 +53,14 @@ const customerSchema = new mongoose.Schema({
     },
   ],
   isVerified: { type: Boolean, default: false },
-  address: String,
+  address: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address" }],
   accountActive: {
     type: Boolean,
     default: true,
+  },
+  review: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Review",
   },
 });
 
@@ -66,6 +71,11 @@ customerSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
+  next();
+});
+
+customerSchema.pre(/^find/, function (next) {
+  this.find({ accountActive: { $ne: false } });
   next();
 });
 
@@ -84,12 +94,22 @@ customerSchema.methods.correctPassword = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-customerSchema.methods.updatePassword = async function (timeStamp) {
+customerSchema.methods.changePassword = async function (timeStamp) {
   if (this.passwordChangeAt) {
     const time = parseInt(this.passwordChangeAt.getTime() / 1000, 10);
     return time > timeStamp;
   }
   return false;
+};
+
+customerSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  return resetToken;
 };
 
 const Customer = mongoose.model("Customer", customerSchema);
