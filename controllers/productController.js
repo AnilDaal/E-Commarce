@@ -58,6 +58,12 @@ const getAllProduct = catchAsync(async (req, res, next) => {
   const limit = req.query.limit * 1 || 20;
   const skip = (page - 1) * limit;
 
+  if (req.query.page) {
+    const totalProduct = await Product.countDocuments();
+    if (skip > totalProduct) {
+      return next(new AppError("This page does not exist", 401));
+    }
+  }
   const productData = await Product.find().skip(skip).limit(limit);
   res.status(201).json({
     status: "succes",
