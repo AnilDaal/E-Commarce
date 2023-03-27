@@ -67,7 +67,6 @@ const adminLogin = catchAsync(async (req, res, next) => {
     return next(new AppError("Please enter email or password", 400));
   }
   const adminData = await Admin.findOne({ email }).select("+password");
-  console.log(adminData);
   if (
     !adminData ||
     !(await adminData.correctPassword(password, adminData.password))

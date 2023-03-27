@@ -9,6 +9,10 @@ import dotenv from "dotenv";
 import AppError from "./utils/appError.js";
 import globelErrorHandling from "./controllers/errorController.js";
 import adminRoute from "./routes/adminRoute.js";
+import helmet from "helmet";
+import xss from "xss-clean";
+import ExpressMongoSanitize from "express-mongo-sanitize";
+import hpp from "hpp";
 
 dotenv.config({ path: "./.env" });
 const app = express();
@@ -31,9 +35,15 @@ process.on("unhandledRejection", (err) => {
 
 app.use(cors());
 app.use(morgan("dev"));
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
+// for mongodb query in input
+app.use(ExpressMongoSanitize());
+// for bad html in input
+app.use(xss());
+app.use(hpp());
+app.use(helmet());
 
-//mongoose
+// mongoose
 mongoose.set("strictQuery", true);
 // mongoose.set("bufferCommands", false);
 mongoose.connect(process.env.MONGO_DB, (err) => {

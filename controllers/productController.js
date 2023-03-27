@@ -54,7 +54,11 @@ const deleteProduct = catchAsync(async (req, res, next) => {
 });
 
 const getAllProduct = catchAsync(async (req, res, next) => {
-  const productData = await Product.find();
+  const page = req.query.page * 1 || 1;
+  const limit = req.query.limit * 1 || 20;
+  const skip = (page - 1) * limit;
+
+  const productData = await Product.find().skip(skip).limit(limit);
   res.status(201).json({
     status: "succes",
     results: productData.length,
@@ -64,7 +68,7 @@ const getAllProduct = catchAsync(async (req, res, next) => {
 
 const getSingleProduct = catchAsync(async (req, res, next) => {
   const productId = req.params.productId;
-  const productData = await Product.findOne(productId);
+  const productData = await Product.findById(productId);
   res.status(201).json({
     status: "succes",
     data: productData,
