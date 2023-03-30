@@ -63,6 +63,15 @@ const customerLogin = catchAsync(async (req, res, next) => {
 });
 
 const getAllCustomer = catchAsync(async (req, res, next) => {
+  const page = req.query.page || 1;
+  const limit = req.query.limit || 10;
+  const skip = (page - 1) * limit;
+  if (req.query.page) {
+    const totalSeller = await Customer.countDocuments();
+    if (skip > totalSeller) {
+      return next(new AppError("page does not exist ", 401));
+    }
+  }
   const customerData = await Customer.find();
   res.status(201).json({
     status: "success",

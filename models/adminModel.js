@@ -47,7 +47,6 @@ adminSchema.pre("save", async function (next) {
     return next();
   }
   const salt = await bcrypt.genSalt(12);
-  this.passwordChangeAt = Date.now() - 2000;
   this.password = await bcrypt.hash(this.password, salt);
   this.confirmPassword = undefined;
   next();

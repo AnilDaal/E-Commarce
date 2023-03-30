@@ -78,7 +78,16 @@ const SellerLogin = catchAsync(async (req, res, next) => {
 // Sellers Controllers
 
 const getAllSeller = catchAsync(async (req, res, next) => {
-  const sellerData = await Seller.find();
+  const page = req.query.page || 1;
+  const limit = req.query.limit || 10;
+  const skip = (page - 1) * limit;
+  if (req.query.page) {
+    const totalSeller = await Seller.countDocuments();
+    if (skip > totalSeller) {
+      return next(new AppError("page does not exist ", 401));
+    }
+  }
+  const sellerData = await Seller.find().skip(skip).limit(limit);
   if (!sellerData) {
     return next(new AppError("no seller found", 400));
   }
@@ -90,9 +99,9 @@ const getAllSeller = catchAsync(async (req, res, next) => {
 });
 
 const getSingleSeller = catchAsync(async (req, res, next) => {
-  console.log("this is single seller route");
   const sellerId = req.params.sellerId;
   const sellerData = await Seller.findById(sellerId);
+
   if (!sellerData) {
     return next(new AppError("No Seller found with this Id", 400));
   }
@@ -240,7 +249,6 @@ const updateSellerPassword = catchAsync(async (req, res, next) => {
     return next("Please Login or Signup", 401);
   }
   const sellerData = await Seller.findById(sellerId).select("+password");
-  console.log(currentPassword, sellerData.password);
   if (!sellerData.correctPassword(currentPassword, sellerData.password)) {
     return next(new AppError("Please Enter Correct Password", 401));
   }
@@ -255,8 +263,16 @@ const updateSellerPassword = catchAsync(async (req, res, next) => {
 
 const getSellerProduct = catchAsync(async (req, res, next) => {
   const sellerId = req.user._id;
-  console.log("helo");
-  const productData = await Product.find({ sellerId });
+  const page = req.query.page || 1;
+  const limit = req.query.limit || 10;
+  const skip = (page - 1) * limit;
+  if (req.query.page) {
+    const totalSeller = await Seller.countDocuments();
+    if (skip > totalSeller) {
+      return next(new AppError("page does not exist ", 401));
+    }
+  }
+  const productData = await Product.find({ sellerId }).skip(skip).limit(limit);
   // find the seller using id and after all find the product list in the seller and show all of them
   if (!productData) {
     return next(new AppError(" No Product found with this Id", 401));
