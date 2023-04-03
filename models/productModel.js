@@ -13,8 +13,7 @@ const productSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-
-      minlength: 10,
+      minlength: [10, "product have more than 8 charchter desc"],
     },
     details: {
       type: String,
