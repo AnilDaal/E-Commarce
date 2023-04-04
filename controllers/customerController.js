@@ -14,6 +14,7 @@ const customerSignup = catchAsync(async (req, res, next) => {
   if (!email || !password || !name || !confirmPassword) {
     return next(new AppError("Please Enter All field", 401));
   }
+  console.log("dikkat");
   const customerData = await Customer.create({
     email,
     password,
@@ -23,7 +24,6 @@ const customerSignup = catchAsync(async (req, res, next) => {
   // create cart and wishlist
   await addCustomerCart(customerData._id);
   await addCustomerWishlist(customerData._id);
-
   const token = jwt.sign(
     { id: customerData._id, role: customerData.roles },
     process.env.SECRET_KEY,

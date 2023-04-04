@@ -307,19 +307,21 @@ const getSellerProduct = catchAsync(async (req, res, next) => {
 
   // find the seller using id and after all find the product list in the seller and show all of them
   const totalProduct = await Product.find({ sellerId }).countDocuments();
-  const features = new ApiFeatures(Product.find({ sellerId }), req.query)
+  let features = new ApiFeatures(Product.find({ sellerId }), req.query)
     .pagination()
-    .filter()
     .sort()
-    .limitFields();
+    .filter()
+    .limitFields()
+    .search();
   const productData = await features.query;
+
   if (!productData) {
     return next(new AppError(" No Product found with this Id", 401));
   }
   res.status(201).json({
     status: "success",
-    results: productData.length,
     totalProduct,
+    filterProduct: productData.length,
     data: productData,
   });
 });

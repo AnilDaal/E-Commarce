@@ -1,6 +1,7 @@
 import catchAsync from "../utils/catchAsync.js";
 import Product from "../models/productModel.js";
 import AppError from "../utils/appError.js";
+import ApiFeatures from "../utils/apiFeatures.js";
 
 const addSellerProduct = catchAsync(async (req, res, next) => {
   const sellerId = req.user._id;
@@ -54,20 +55,23 @@ const deleteProduct = catchAsync(async (req, res, next) => {
 });
 
 const getAllProduct = catchAsync(async (req, res, next) => {
-  const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 20;
-  const skip = (page - 1) * limit;
+  const totalProduct = await Product.find().countDocuments();
+  const features = new ApiFeatures(Product.find(), req.query)
+    .pagination()
+    .sort()
+    .filter()
+    .limitFields()
+    .search();
+  const productData = await features.query;
 
-  if (req.query.page) {
-    const totalProduct = await Product.countDocuments();
-    if (skip > totalProduct) {
-      return next(new AppError("This page does not exist", 401));
-    }
+  if (!productData) {
+    return next(new AppError(" No Product found with this Id", 401));
   }
-  const productData = await Product.find().skip(skip).limit(limit);
+
   res.status(201).json({
     status: "succes",
-    results: productData.length,
+    totalProduct,
+    filterProduct: productData.length,
     data: productData,
   });
 });

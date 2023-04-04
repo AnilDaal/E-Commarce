@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import Cart from "./cartModel.js";
 import validator from "validator";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
@@ -27,7 +26,7 @@ const customerSchema = new mongoose.Schema({
   // only use when create and save!!
   confirmPassword: {
     type: String,
-    required: [true, "Please confirm your password"],
+    required: [true, "Please confirm your confirm password"],
     validate: {
       validator: function (value) {
         return value === this.password;
@@ -49,7 +48,7 @@ const customerSchema = new mongoose.Schema({
   cart: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: Cart,
+      ref: "Cart",
     },
   ],
   isVerified: { type: Boolean, default: false },

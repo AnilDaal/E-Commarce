@@ -5,14 +5,14 @@ class ApiFeatures {
   }
   filter() {
     const queryObj = { ...this.queryString };
-    const excludeField = ["page", "sort", "limit", "fields"];
+    const excludeField = ["page", "sort", "limit", "search", "fields"];
     excludeField.forEach((el) => {
       delete queryObj[el];
     });
 
     // 2) advanced filtering
     let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|lte|gt|le)\b/g, (match) => `$${match}`);
+    queryStr = queryStr.replace(/\b(gte|lte|gt|lt)\b/g, (match) => `$${match}`);
     this.query = this.query.find(JSON.parse(queryStr));
     return this;
   }
@@ -45,7 +45,18 @@ class ApiFeatures {
     //       return next(new AppError("page does not exist ", 401));
     //     }
     //   }
+
     this.query = this.query.limit(limit).skip(skip);
+    return this;
+  }
+  search() {
+    if (this.queryString.search) {
+      this.query = this.query.find({
+        $text: {
+          $search: this.queryString.search,
+        },
+      });
+    }
     return this;
   }
 }

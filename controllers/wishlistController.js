@@ -7,34 +7,38 @@ const getCustomerWishlist = catchAsync(async (req, res, next) => {
   if (!req.user._id) {
     return next(AppError("Please Login or Signup", 401));
   }
-  const wishlistData = await Wishlist.findById(req.user._id);
+  const wishlistData = await Wishlist.findById(req.user._id).populate(
+    "wishlistProduct.productId"
+  );
+
   //  get wishlist using customer schema
   if (!wishlistData) {
     return next(new AppError("No Wishlist found with this Id", 401));
   }
   res.status(201).json({
     status: "success",
+    results: wishlistData.wishlistProduct.length,
     data: wishlistData,
   });
 });
 
 const addCustomerWishlist = async (customerId) => {
-  const cartData = await Wishlist({
+  const wishlistData = await Wishlist({
     _id: customerId,
   });
-  await cartData.save({ validateBeforeSave: false });
+  await wishlistData.save({ validateBeforeSave: false });
 };
 
 const updateCustomerWishlist = catchAsync(async (req, res, next) => {
-  const { productId } = req.params;
+  const { wishlistProduct } = req.body;
   if (!req.user._id) {
     return next(AppError("Please Login or Signup", 401));
   }
   const wishlistData = await Wishlist.findByIdAndUpdate(
     req.user._id,
     {
-      $push: {
-        productId: productId,
+      $set: {
+        wishlistProduct,
       },
     },
     {
@@ -53,13 +57,16 @@ const updateCustomerWishlist = catchAsync(async (req, res, next) => {
 const deleteItemCustomerWishlist = catchAsync(async (req, res, next) => {
   const { productId } = req.params;
   if (!req.user._id) {
-    return next(AppError("Please Login or Signup", 401));
+    return next(new AppError("Please Login or Signup", 401));
   }
-  const wishlistData = await Wishlist.findByIdAndUpdate(
+  const wishlistData = await Wishlist.find(req.user._id, {
+    wishlistProduct: { $elemMatch: { productId } },
+  });
+  const wishlistNewData = await Wishlist.findByIdAndUpdate(
     req.user._id,
     {
       $pull: {
-        productId: productId,
+        wishlistProduct: { _id: wishlistData[0].wishlistProduct[0]._id },
       },
     },
     {
@@ -71,7 +78,7 @@ const deleteItemCustomerWishlist = catchAsync(async (req, res, next) => {
   }
   res.status(201).json({
     status: "success",
-    data: wishlistData,
+    data: wishlistNewData,
   });
 });
 

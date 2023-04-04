@@ -68,7 +68,7 @@ sellerSchema.pre(/^find/, function (next) {
 });
 
 sellerSchema.pre("save", function (next) {
-  if (!this.isModified("password") || !this.isNew) {
+  if (!this.isModified("password") || this.isNew) {
     return next();
   }
   this.passwordChangeAt = Date.now() - 1000;

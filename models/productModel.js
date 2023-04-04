@@ -50,7 +50,7 @@ const productSchema = new mongoose.Schema(
       min: 1,
       require: [true, "product must have quantity"],
     },
-    price: { type: String, require: [true, "product must have price"] },
+    price: { type: Number, require: [true, "product must have price"] },
     date_added: {
       type: Date,
       default: Date.now(),
@@ -64,6 +64,8 @@ const productSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+productSchema.index({ category: "text" });
 
 const Product = mongoose.model("Product", productSchema);
 
