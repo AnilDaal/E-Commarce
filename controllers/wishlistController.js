@@ -19,19 +19,10 @@ const getCustomerWishlist = catchAsync(async (req, res, next) => {
 });
 
 const addCustomerWishlist = async (customerId) => {
-  const wishlistData = await Wishlist({
+  const cartData = await Wishlist({
     _id: customerId,
   });
-  await wishlistData.save({ validateBeforeSave: false });
-  // update customer schema and add data in the wishlistcustomer
-  // const addWishlist = await wishlistData.create({
-  //   product: title,
-  //   userid,
-  // });
-  // return {
-  //   status: "success",
-  //   data: wishlistData,
-  // };
+  await cartData.save({ validateBeforeSave: false });
 };
 
 const updateCustomerWishlist = catchAsync(async (req, res, next) => {

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import AppError from "../utils/appError.js";
 
 const productSchema = new mongoose.Schema(
   {
@@ -20,13 +21,23 @@ const productSchema = new mongoose.Schema(
     },
     totalProduct: {
       type: Number,
+      validate: {
+        validator: function (value) {
+          if (value > this.quantity) {
+            return AppError(
+              "total number of product should be below quantity",
+              401
+            );
+          }
+        },
+      },
     },
     stock: {
       type: Boolean,
       default: true,
       validate: {
         validator: function (value) {
-          if (this.totalProduct < 1) {
+          if (this.quantity < 1) {
             this.stock = false;
           }
         },

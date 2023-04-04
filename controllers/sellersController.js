@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import AppError from "../utils/appError.js";
 import sendEmail from "../utils/email.js";
 import crypto from "crypto";
+import ApiFeatures from "../utils/apiFeatures.js";
 
 // seller signup
 const SellerSignup = catchAsync(async (req, res, next) => {
@@ -146,7 +147,7 @@ const resetPassword = catchAsync(async (req, res, next) => {
   // 2) check user existed or not and token is not expire
   const sellerData = await Seller.findOne({
     passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() },
+    passwordResetExpires: { $gte: Date.now() },
   });
   if (!sellerData) {
     return next(new AppError("Token was expire or invalid", 404));
@@ -263,23 +264,62 @@ const updateSellerPassword = catchAsync(async (req, res, next) => {
 
 const getSellerProduct = catchAsync(async (req, res, next) => {
   const sellerId = req.user._id;
-  const page = req.query.page || 1;
-  const limit = req.query.limit || 10;
-  const skip = (page - 1) * limit;
-  if (req.query.page) {
-    const totalSeller = await Seller.countDocuments();
-    if (skip > totalSeller) {
-      return next(new AppError("page does not exist ", 401));
-    }
-  }
-  const productData = await Product.find({ sellerId }).skip(skip).limit(limit);
+  // // 1) filtering
+  // const queryObj = { ...req.query };
+  // const excludeField = ["page", "sort", "limit", "fields"];
+  // excludeField.forEach((el) => {
+  //   delete queryObj[el];
+  // });
+
+  // // 2) advanced filtering
+  // let queryStr = JSON.stringify(queryObj);
+  // queryStr = queryStr.replace(/\b(gte|lte|gt|le)\b/g, (match) => `$${match}`);
+  // let query = Product.find(JSON.parse(queryStr));
+
+  // 4) Sorting
+  // if (req.query.sort) {
+  //   const sortBy = req.query.sort.split(",").join(" ");
+  //   query = query.sort(sortBy);
+  // } else {
+  //   query = query.sort("createdAt");
+  // }
+
+  // 3) pagination
+
+  // const page = req.query.page || 1;
+  // const limit = req.query.limit || 10;
+  // const skip = (page - 1) * limit;
+  // let totalProduct;
+  // if (req.query.page) {
+  //   totalProduct = await Product.find({ sellerId }).countDocuments();
+  //   if (skip >= totalProduct) {
+  //     return next(new AppError("page does not exist ", 401));
+  //   }
+  // }
+  // query = query.limit(limit).skip(skip);
+
+  // 5) fields
+
+  // if (req.query.fields) {
+  //   const fields = fields.split(",").join(" ");
+  //   query = query.select(fields);
+  // }
+
   // find the seller using id and after all find the product list in the seller and show all of them
+  const totalProduct = await Product.find({ sellerId }).countDocuments();
+  const features = new ApiFeatures(Product.find({ sellerId }), req.query)
+    .pagination()
+    .filter()
+    .sort()
+    .limitFields();
+  const productData = await features.query;
   if (!productData) {
     return next(new AppError(" No Product found with this Id", 401));
   }
   res.status(201).json({
     status: "success",
     results: productData.length,
+    totalProduct,
     data: productData,
   });
 });

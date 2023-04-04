@@ -2,15 +2,19 @@ import mongoose from "mongoose";
 
 const cartSchema = new mongoose.Schema(
   {
-    productId: [
+    cartProduct: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        unique: [true, "this product allready added"],
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        productQuantity: String,
       },
     ],
   },
   { timestamps: true }
 );
 
-export default Cart = mongoose.model("Cart", cartSchema);
+const Cart = mongoose.model("Cart", cartSchema);
+// Cart.createIndexes({ unique: true, dropDups: true });
+export default Cart;

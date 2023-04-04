@@ -17,7 +17,7 @@ const addSellerProduct = catchAsync(async (req, res, next) => {
 });
 
 const updateProduct = catchAsync(async (req, res, next) => {
-  const { sellerId, productId } = req.params;
+  const { productId } = req.params;
   const { title, description, category, price, image } = req.body;
   const productData = await Product.findByIdAndUpdate(
     productId,
@@ -42,14 +42,14 @@ const updateProduct = catchAsync(async (req, res, next) => {
 });
 
 const deleteProduct = catchAsync(async (req, res, next) => {
-  const { sellerId, productId } = req.params;
+  const { productId } = req.params;
   const productData = await Product.findByIdAndDelete(productId);
   if (!productData) {
     return next(new AppError("No Product found with this Id", 401));
   }
   res.status(201).json({
     status: "success",
-    data: productData,
+    data: null,
   });
 });
 
