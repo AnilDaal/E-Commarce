@@ -2,11 +2,16 @@ import mongoose from "mongoose";
 
 const cartSchema = new mongoose.Schema(
   {
-    productId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-    },
-    // productQuantity: { type: Number, default: 1 },
+    cartProduct: [
+      {
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
+
+        productQuantity: { type: Number, default: 1 },
+      },
+    ],
   },
   { timestamps: true }
 );

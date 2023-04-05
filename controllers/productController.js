@@ -2,6 +2,7 @@ import catchAsync from "../utils/catchAsync.js";
 import Product from "../models/productModel.js";
 import AppError from "../utils/appError.js";
 import ApiFeatures from "../utils/apiFeatures.js";
+import Cart from "../models/cartModel.js";
 
 const addSellerProduct = catchAsync(async (req, res, next) => {
   const sellerId = req.user._id;
@@ -96,10 +97,18 @@ const getSingleProduct = catchAsync(async (req, res, next) => {
 const productQuantity = catchAsync(async (req, res, next) => {
   const { productId, totalProduct } = req.body;
   const productData = await Product.findById(productId);
-  if (totalProduct >= productData.totalQuantity) {
+  if (totalProduct > productData.totalQuantity) {
     return next(new AppError(`${productData.totalQuantity}`, 401));
   }
-  res.status(200).json({ status: "success", data: productData.totalQuantity });
+  const cartData = await Cart.findById(req.user._id);
+  cartData.cartProduct.map((data) => {
+    if (data.productId.toString() === productId) {
+      data.productQuantity = totalProduct;
+    }
+  });
+  await cartData.save();
+
+  res.status(200).json({ status: "success", data: cartData });
 });
 
 export {
