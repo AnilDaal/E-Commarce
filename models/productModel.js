@@ -60,14 +60,14 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-productSchema.pre(/^find/, function (next) {
-  const productData = this.find({ totalQuantity: { $lt: 1 } });
-  console.log(productData);
-  if (productData) {
-    productData.stock = false;
-  }
-  next();
-});
+// productSchema.pre(/^find/, function (next) {
+//   const productData = this.find({ totalQuantity: { $lt: 1 } });
+//   console.log(productData);
+//   if (productData) {
+//     productData.stock = false;
+//   }
+//   next();
+// });
 
 productSchema.methods.finalQua = function (userQuantity) {
   this.totalQuantity = this.totalQuantity - userQuantity;
