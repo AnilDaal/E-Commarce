@@ -5,8 +5,16 @@ import ApiFeatures from "../utils/apiFeatures.js";
 
 const addSellerProduct = catchAsync(async (req, res, next) => {
   const sellerId = req.user._id;
-  const { title, description, category, price, image } = req.body;
-  if (!title || !description || !category || !price || !image) {
+  const { title, description, category, price, image, totalQuantity } =
+    req.body;
+  if (
+    !title ||
+    !description ||
+    !category ||
+    !price ||
+    !image ||
+    !totalQuantity
+  ) {
     return next(new AppError("please fill all field", 401));
   }
   const productData = await Product.create({ ...req.body, sellerId });
@@ -78,11 +86,22 @@ const getAllProduct = catchAsync(async (req, res, next) => {
 
 const getSingleProduct = catchAsync(async (req, res, next) => {
   const productId = req.params.productId;
+  console.log("helo");
   const productData = await Product.findById(productId);
+  console.log("helo1");
   res.status(201).json({
     status: "succes",
     data: productData,
   });
+});
+
+const productQuantity = catchAsync(async (req, res, next) => {
+  const { productId, totalProduct } = req.body;
+  const productData = await Product.findById(productId);
+  if (totalProduct > productData.totalQuantity) {
+    return next(new AppError(`${productData.totalQuantity}`, 401));
+  }
+  res.status(200).json({ status: "success", data: productData.totalQuantity });
 });
 
 export {
@@ -91,4 +110,5 @@ export {
   deleteProduct,
   getAllProduct,
   getSingleProduct,
+  productQuantity,
 };

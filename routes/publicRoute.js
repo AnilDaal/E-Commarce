@@ -13,9 +13,9 @@ router.route("/").get(getAllProduct);
 router.route("/:productId").get(getSingleProduct);
 
 // public cart
-router.route("/cart").put(addItemPublicCart);
+router.route("/cart").patch(addItemPublicCart);
 
 // public wishlist
-router.route("/wishlist").put(addItemPublicWishlist);
+router.route("/wishlist").patch(addItemPublicWishlist);
 
 export default router;

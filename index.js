@@ -36,9 +36,9 @@ process.on("unhandledRejection", (err) => {
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json({ limit: "5mb" }));
-// for mongodb query in input
+// for mongodb query in inpatch
 app.use(ExpressMongoSanitize());
-// for bad html in input
+// for bad html in inpatch
 app.use(xss());
 app.use(hpp());
 app.use(helmet());

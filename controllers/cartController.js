@@ -12,9 +12,7 @@ const addCustomerCart = async (customerId) => {
 
 const getCustomerCart = catchAsync(async (req, res, next) => {
   const customerId = req.user._id;
-  const cartData = await Cart.findById(customerId).populate(
-    "cartProduct.productId"
-  );
+  const cartData = await Cart.findById(customerId).populate("productId");
   // .populate({
   //   path: "wishlist",
   //   model: "Wishlist",
@@ -30,76 +28,100 @@ const getCustomerCart = catchAsync(async (req, res, next) => {
   });
 });
 
-// const updateCustomerCart = catchAsync(async (req, res, next) => {
-//   const { productId } = req.params;
-//   if (!req.user._id) {
-//     return next(new AppError("No user found please login or signup", 403));
-//   }
-//   const cartData = await Cart.findByIdAndUpdate(
-//     req.user._id,
-//     {
-//       $addToSet: {
-//         productId,
-//       },
-//     },
-//     {
-//       new: true,
-//     }
-//   );
-//   // update cart schema using customer schema
-//   if (!cartData) {
-//     return next(new AppError("No Cart found with this Id", 401));
-//   }
-//   res.status(201).json({
-//     status: "success",
-//     data: cartData,
-//   });
-// });
-
 const updateCustomerCart = catchAsync(async (req, res, next) => {
-  const { cartProduct } = req.body;
-  const productData = await Cart.findByIdAndUpdate(
-    { _id: req.user._id },
+  const { productId } = req.params;
+  if (!req.user._id) {
+    return next(new AppError("No user found please login or signup", 403));
+  }
+  const cartData = await Cart.findByIdAndUpdate(
+    req.user._id,
     {
-      $set: {
-        cartProduct,
+      $addToSet: {
+        productId,
       },
     },
-    { new: true }
+    {
+      new: true,
+    }
   );
-  if (!productData) {
+  // update cart schema using customer schema
+  if (!cartData) {
     return next(new AppError("No Cart found with this Id", 401));
   }
   res.status(201).json({
     status: "success",
-    data: productData,
+    data: cartData,
   });
 });
+
+// const updateCustomerCart = catchAsync(async (req, res, next) => {
+//   const { cartProduct } = req.body;
+//   const productData = await Cart.findByIdAndUpdate(
+//     { _id: req.user._id },
+//     {
+//       $set: {
+//         cartProduct,
+//       },
+//     },
+//     { new: true }
+//   );
+//   if (!productData) {
+//     return next(new AppError("No Cart found with this Id", 401));
+//   }
+//   res.status(201).json({
+//     status: "success",
+//     data: productData,
+//   });
+// });
+
+// const deleteItemCustomerCart = catchAsync(async (req, res, next) => {
+//   const { productId } = req.params;
+//   if (!req.user._id) {
+//     return next(new AppError("Please login for cart changes", 403));
+//   }
+//   const cartData = await Cart.find(req.user._id, {
+//     cartProduct: { $elemMatch: { productId } },
+//   });
+//   const cartNewData = await Cart.findByIdAndUpdate(
+//     req.user._id,
+//     {
+//       $pull: {
+//         cartProduct: { _id: cartData[0].cartProduct[0]._id },
+//       },
+//     },
+//     { new: true }
+//   );
+//   // update cart schema using customer schema
+//   if (!cartNewData) {
+//     return next(new AppError("No Cart found with this Id", 401));
+//   }
+//   res.status(201).json({
+//     status: "success",
+//     data: cartNewData,
+//   });
+// });
 
 const deleteItemCustomerCart = catchAsync(async (req, res, next) => {
   const { productId } = req.params;
   if (!req.user._id) {
     return next(new AppError("Please login for cart changes", 403));
   }
-  const cartData = await Cart.find(req.user._id, {
-    cartProduct: { $elemMatch: { productId } },
-  });
-  const cartNewData = await Cart.findByIdAndUpdate(
+  const cartData = await Cart.findByIdAndUpdate(
     req.user._id,
     {
       $pull: {
-        cartProduct: { _id: cartData[0].cartProduct[0]._id },
+        productId,
       },
     },
     { new: true }
   );
   // update cart schema using customer schema
-  if (!cartNewData) {
+  if (!cartData) {
     return next(new AppError("No Cart found with this Id", 401));
   }
   res.status(201).json({
     status: "success",
-    data: cartNewData,
+    data: cartData,
   });
 });
 

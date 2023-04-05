@@ -26,13 +26,40 @@ import {
 } from "../controllers/wishlistController.js";
 import { createOrder, orderHistory } from "../controllers/orderController.js";
 import { authUser, restrictTo } from "../controllers/authController.js";
+import { productQuantity } from "../controllers/productController.js";
 
+import {
+  getAddress,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+} from "../controllers/addressController.js";
 // route middleware
 const router = express.Router();
 
 // reset password or forget password
 router.post("/forgetCustomerPassword", forgetPassword);
 router.post("/resetCustomerPassword/:token", resetPassword);
+
+// address routes
+router
+  .route("/customerAddress")
+  .get(authUser, restrictTo("customer"), getAddress)
+  .post(authUser, restrictTo("customer"), addAddress);
+
+router
+  .route("/customerAddress/:addressId")
+  .patch(authUser, restrictTo("customer"), updateAddress)
+  .delete(authUser, restrictTo("customer"), deleteAddress);
+
+//check product availble or not
+
+router.post(
+  "/productQuantity",
+  authUser,
+  restrictTo("customer"),
+  productQuantity
+);
 
 // create order
 router
@@ -47,10 +74,10 @@ router
   .get(authUser, restrictTo("customer"), getCustomerCart);
 router
   .route("/customerCart/:productId")
-  .put(authUser, restrictTo("customer"), updateCustomerCart);
+  .patch(authUser, restrictTo("customer"), updateCustomerCart);
 router
   .route("/deleteCartProduct/:productId")
-  .put(authUser, restrictTo("customer"), deleteItemCustomerCart);
+  .patch(authUser, restrictTo("customer"), deleteItemCustomerCart);
 
 // wishlist route
 router
@@ -58,10 +85,10 @@ router
   .get(authUser, restrictTo("customer"), getCustomerWishlist);
 router
   .route("/customerWishlist/:productId")
-  .put(authUser, restrictTo("customer"), updateCustomerWishlist);
+  .patch(authUser, restrictTo("customer"), updateCustomerWishlist);
 router
   .route("/deleteWishlistProduct/:productId")
-  .put(authUser, restrictTo("customer"), deleteItemCustomerWishlist);
+  .patch(authUser, restrictTo("customer"), deleteItemCustomerWishlist);
 
 // signup route
 router.route("/signup").post(customerSignup);
@@ -78,7 +105,7 @@ router.post(
 
 router
   .route("/")
-  .put(authUser, restrictTo("customer"), updateCustomer)
+  .patch(authUser, restrictTo("customer"), updateCustomer)
   .get(authUser, restrictTo("admin"), getAllCustomer);
 router
   .route("/:customerId")

@@ -6,15 +6,19 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
     },
-    product: [
+    orderProduct: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        productQuantity: { type: Number, default: 1 },
       },
     ],
-    totalItems: { type: Number, min: 1 },
-    paymentSchema: String,
-    orderTotal: String,
+    paymentId: String,
+    totalItems: Number,
+    addressId: { type: mongoose.Schema.Types.ObjectId, ref: "Address" },
+    orderTotal: Number,
   },
   { timestamps: true }
 );

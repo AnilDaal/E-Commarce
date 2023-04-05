@@ -23,7 +23,7 @@ const router = express.Router();
 
 // product route
 
-router.put(
+router.patch(
   "/resetSellerPassword/:token",
   authUser,
   restrictTo("seller"),
@@ -31,7 +31,7 @@ router.put(
 );
 router
   .route("/forgetSellerPassword")
-  .put(authUser, restrictTo("seller"), forgetPassword);
+  .patch(authUser, restrictTo("seller"), forgetPassword);
 
 router
   .route("/products")
@@ -41,11 +41,11 @@ router
 router
   .route("/:sellerId")
   .get(authUser, restrictTo("seller", "admin"), getSingleSeller)
-  .put(authUser, restrictTo("seller"), updateSellerPassword);
+  .patch(authUser, restrictTo("seller"), updateSellerPassword);
 
 router
   .route("/product/:productId")
-  .put(authUser, restrictTo("seller", "admin"), updateProduct)
+  .patch(authUser, restrictTo("seller", "admin"), updateProduct)
   .delete(authUser, restrictTo("seller", "admin"), deleteProduct);
 
 // signup route
@@ -56,7 +56,7 @@ router.route("/login").post(SellerLogin);
 router
   .route("/")
   .get(authUser, restrictTo("admin"), getAllSeller)
-  .put(authUser, restrictTo("seller"), updateSeller)
+  .patch(authUser, restrictTo("seller"), updateSeller)
   .delete(authUser, restrictTo("seller", "admin"), deleteSeller);
 
 // kyc of sellers

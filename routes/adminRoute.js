@@ -16,14 +16,14 @@ const router = express.Router();
 
 router.route("/login").post(adminLogin);
 router.route("/signup").post(adminSignup);
-router.route("/updateAdmin").put(authUser, restrictTo("admin"), updateAdmin);
-router.put(
+router.route("/updateAdmin").patch(authUser, restrictTo("admin"), updateAdmin);
+router.patch(
   "/resetAdminPassward/:token",
   authUser,
   restrictTo("admin"),
   resetPassword
 );
-router.put(
+router.patch(
   "/forgetAdminPassward/:token",
   authUser,
   restrictTo("admin"),
@@ -31,9 +31,11 @@ router.put(
 );
 router
   .route("/updateAdminPassword")
-  .put(authUser, restrictTo("admin"), updateAdminPassword);
+  .patch(authUser, restrictTo("admin"), updateAdminPassword);
 
 // sellers Controler
-router.route("/seller/:sellerId").put(authUser, restrictTo("admin"), verifyKyc);
+router
+  .route("/seller/:sellerId")
+  .patch(authUser, restrictTo("admin"), verifyKyc);
 
 export default router;

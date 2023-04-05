@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import AppError from "../utils/appError.js";
 
 const productSchema = new mongoose.Schema(
   {
@@ -19,42 +18,38 @@ const productSchema = new mongoose.Schema(
     details: {
       type: String,
     },
-    totalProduct: {
-      type: Number,
-      validate: {
-        validator: function (value) {
-          if (value > this.quantity) {
-            return AppError(
-              "total number of product should be below quantity",
-              401
-            );
-          }
-        },
-      },
-    },
     stock: {
       type: Boolean,
       default: true,
-      validate: {
-        validator: function (value) {
-          if (this.quantity < 1) {
-            this.stock = false;
-          }
-        },
-        message: "product not available right now",
-      },
+      // validate: {
+      //   validator: function () {
+      //     if (this.quantity < 1) {
+      //       this.stock = false;
+      //     }
+      //   },
+      //   message: "product not available right now",
+      // },
     },
     category: String,
-    quantity: {
+    totalQuantity: {
       type: Number,
-      min: 1,
       require: [true, "product must have quantity"],
+      default: 1,
     },
+    // totalProduct: {
+    //   type: Number,
+    //   validate: {
+    //     validator: function (value) {
+    //       if (value > this.quantity) {
+    //         return AppError(
+    //           "total number of product should be below quantity",
+    //           401
+    //         );
+    //       }
+    //     },
+    //   },
+    // },
     price: { type: Number, require: [true, "product must have price"] },
-    date_added: {
-      type: Date,
-      default: Date.now(),
-    },
     image: {
       type: String,
       require: [true, "product must have image"],
@@ -64,6 +59,19 @@ const productSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+productSchema.pre(/^find/, function (next) {
+  const productData = this.find({ totalQuantity: { $lt: 1 } });
+  console.log(productData);
+  if (productData) {
+    productData.stock = false;
+  }
+  next();
+});
+
+productSchema.methods.finalQua = function (userQuantity) {
+  this.totalQuantity = this.totalQuantity - userQuantity;
+};
 
 productSchema.index({ category: "text" });
 
