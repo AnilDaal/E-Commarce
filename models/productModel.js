@@ -35,6 +35,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       require: [true, "product must have quantity"],
       default: 1,
+      min: 0,
     },
     // totalProduct: {
     //   type: Number,
@@ -61,15 +62,18 @@ const productSchema = new mongoose.Schema(
 );
 
 // productSchema.pre(/^find/, function (next) {
-//   const productData = this.find({ totalQuantity: { $lt: 1 } });
-//   console.log(productData);
-//   if (productData) {
-//     productData.stock = false;
-//   }
+//   const productData = this.find({ stock: { $ne: true } });
+//   // console.log(productData);
+//   // if (productData) {
+//   // productData.stock = false;
+//   // }
 //   next();
 // });
 
 productSchema.methods.finalQua = function (userQuantity) {
+  if (this.totalQuantity === userQuantity) {
+    this.stock = false;
+  }
   this.totalQuantity = this.totalQuantity - userQuantity;
 };
 

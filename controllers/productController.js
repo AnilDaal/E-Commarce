@@ -86,9 +86,7 @@ const getAllProduct = catchAsync(async (req, res, next) => {
 
 const getSingleProduct = catchAsync(async (req, res, next) => {
   const productId = req.params.productId;
-  console.log("helo");
   const productData = await Product.findById(productId);
-  console.log("helo1");
   res.status(201).json({
     status: "succes",
     data: productData,
@@ -98,7 +96,7 @@ const getSingleProduct = catchAsync(async (req, res, next) => {
 const productQuantity = catchAsync(async (req, res, next) => {
   const { productId, totalProduct } = req.body;
   const productData = await Product.findById(productId);
-  if (totalProduct > productData.totalQuantity) {
+  if (totalProduct >= productData.totalQuantity) {
     return next(new AppError(`${productData.totalQuantity}`, 401));
   }
   res.status(200).json({ status: "success", data: productData.totalQuantity });
