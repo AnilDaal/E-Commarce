@@ -3,11 +3,8 @@ import mongoose from "mongoose";
 const wishlistSchema = new mongoose.Schema({
   wishlistProduct: [
     {
-      productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
-      productQuantity: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
     },
   ],
 });
