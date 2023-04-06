@@ -18,6 +18,7 @@ import {
   getCustomerCart,
   updateCustomerCart,
   deleteItemCustomerCart,
+  checkOutCustomerCart,
 } from "../controllers/cartController.js";
 import {
   getCustomerWishlist,
@@ -75,6 +76,10 @@ router
 router
   .route("/customerCart/:productId")
   .patch(authUser, restrictTo("customer"), updateCustomerCart);
+router
+  .route("/checkOutCustomerCart")
+  .patch(authUser, restrictTo("customer"), checkOutCustomerCart);
+
 router
   .route("/deleteCartProduct/:productId")
   .patch(authUser, restrictTo("customer"), deleteItemCustomerCart);

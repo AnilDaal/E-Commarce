@@ -12,9 +12,8 @@ const addCustomerCart = async (customerId) => {
 
 const getCustomerCart = catchAsync(async (req, res, next) => {
   const customerId = req.user._id;
-  const cartData = await Cart.findById(customerId).populate(
-    "cartProduct.productId"
-  );
+  const cartData = await Cart.findById(customerId);
+
   // .populate({
   //   path: "wishlist",
   //   model: "Wishlist",
@@ -25,6 +24,7 @@ const getCustomerCart = catchAsync(async (req, res, next) => {
   }
   res.status(201).json({
     status: "success",
+    results: cartData.cartProduct.length,
     data: cartData,
   });
 });
@@ -77,15 +77,28 @@ const checkOutCustomerCart = catchAsync(async (req, res, next) => {
 
 const updateCustomerCart = catchAsync(async (req, res, next) => {
   const { productId } = req.params;
-  const productData = await Cart.findByIdAndUpdate(
-    req.user._id,
-    {
-      $addToSet: {
-        cartProduct: [{ productId }],
-      },
-    },
-    { new: true }
-  );
+  const productQuantity = req.body.productQuantity || 1;
+  const productData = await Cart.findById(req.user._id);
+  let present = false;
+  productData.cartProduct.map((data) => {
+    if (data.productId.toString() === productId) {
+      present = true;
+    }
+  });
+  if (present) {
+    return next(new AppError("product allready in cart", 401));
+  }
+  productData.cartProduct.push({ productId, productQuantity });
+  // const productData = await Cart.findByIdAndUpdate(
+  //   req.user._id,
+  //   {
+  //     $push: {
+  //       cartProduct: [{ productId, productQuantity }],
+  //     },
+  //   },
+  //   { new: true }
+  // );
+  await productData.save();
   if (!productData) {
     return next(new AppError("No Cart found with this Id", 401));
   }
