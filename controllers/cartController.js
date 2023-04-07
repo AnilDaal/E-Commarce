@@ -12,7 +12,9 @@ const addCustomerCart = async (customerId) => {
 
 const getCustomerCart = catchAsync(async (req, res, next) => {
   const customerId = req.user._id;
-  const cartData = await Cart.findById(customerId);
+  const cartData = await Cart.findById(customerId).populate(
+    "cartProduct.productId"
+  );
 
   // .populate({
   //   path: "wishlist",
