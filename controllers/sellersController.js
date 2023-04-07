@@ -113,7 +113,7 @@ const getSingleSeller = catchAsync(async (req, res, next) => {
 });
 
 const deleteSeller = catchAsync(async (req, res, next) => {
-  const sellerId = req.user._id;
+  const sellerId = req.params.sellerId;
   const sellerData = await Seller.findByIdAndUpdate(
     sellerId,
     {

@@ -21,6 +21,15 @@ import { authUser, restrictTo } from "../controllers/authController.js";
 // route middleware
 const router = express.Router();
 
+// deleteSeller
+
+router.delete(
+  "/deleteSeller/:sellerId",
+  authUser,
+  restrictTo("admin", "seller"),
+  deleteSeller
+);
+
 // product route
 
 router.patch(
@@ -56,8 +65,7 @@ router.route("/login").post(SellerLogin);
 router
   .route("/")
   .get(authUser, restrictTo("admin"), getAllSeller)
-  .patch(authUser, restrictTo("seller"), updateSeller)
-  .delete(authUser, restrictTo("seller", "admin"), deleteSeller);
+  .patch(authUser, restrictTo("seller"), updateSeller);
 
 // kyc of sellers
 

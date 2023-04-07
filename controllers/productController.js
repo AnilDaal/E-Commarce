@@ -28,7 +28,8 @@ const addSellerProduct = catchAsync(async (req, res, next) => {
 
 const updateProduct = catchAsync(async (req, res, next) => {
   const { productId } = req.params;
-  const { title, description, category, price, image } = req.body;
+  const { title, description, category, price, image, totalQuantity } =
+    req.body;
   const productData = await Product.findByIdAndUpdate(
     productId,
     {
@@ -38,6 +39,7 @@ const updateProduct = catchAsync(async (req, res, next) => {
         category,
         price,
         image,
+        totalQuantity,
       },
     },
     { new: true }
