@@ -52,7 +52,6 @@ const sellerSchema = new Schema(
 );
 
 sellerSchema.pre("save", async function (next) {
-  console.log("helo");
   if (!this.isModified("password")) {
     return next();
   }

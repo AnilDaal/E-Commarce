@@ -9,33 +9,20 @@ import ApiFeatures from "../utils/apiFeatures.js";
 
 // seller signup
 const SellerSignup = catchAsync(async (req, res, next) => {
-  const {
-    name,
-    email,
-    password,
-    number,
-    address,
-    pancard,
-    confirmPassword,
-    adharcard,
-  } = req.body;
-  if (
-    !email ||
-    !pancard ||
-    !adharcard ||
-    !name ||
-    !number ||
-    !address ||
-    !confirmPassword
-  ) {
+  const { name, email, password, number, address, confirmPassword } = req.body;
+  const pancard = req.files.pancard[0].path;
+  const adharcard = req.files.adharcard[0].path;
+  // console.log(req.body);
+  if (!email || !name || !number || !address || !confirmPassword) {
     return next(new AppError("Please fill all field", 401));
   }
+
   const sellerData = await Seller.create({
     name,
     email,
+    number,
     pancard,
     adharcard,
-    number,
     address,
     password,
     confirmPassword,

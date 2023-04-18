@@ -1,4 +1,8 @@
 import express from "express";
+import multer from "multer";
+import { storage } from "../utils/multer.js";
+
+const upload = multer({ storage });
 
 import {
   SellerSignup,
@@ -12,13 +16,16 @@ import {
   updateSellerPassword,
   updateSeller,
 } from "../controllers/sellersController.js";
+
 import {
   addSellerProduct,
   updateProduct,
   deleteProduct,
 } from "../controllers/productController.js";
+
 import { authUser, restrictTo } from "../controllers/authController.js";
 // route middleware
+
 const router = express.Router();
 
 // deleteSeller
@@ -58,7 +65,13 @@ router
   .delete(authUser, restrictTo("seller", "admin"), deleteProduct);
 
 // signup route
-router.route("/signup").post(SellerSignup);
+router.route("/signup").post(
+  upload.fields([
+    { name: "adharcard", maxCount: 2 },
+    { name: "pancard", maxCount: 2 },
+  ]),
+  SellerSignup
+);
 
 // login route
 router.route("/login").post(SellerLogin);

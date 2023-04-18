@@ -10,7 +10,6 @@ import AppError from "./utils/appError.js";
 import globelErrorHandling from "./controllers/errorController.js";
 import adminRoute from "./routes/adminRoute.js";
 import helmet from "helmet";
-import xss from "xss-clean";
 import ExpressMongoSanitize from "express-mongo-sanitize";
 import hpp from "hpp";
 
@@ -33,13 +32,16 @@ process.on("unhandledRejection", (err) => {
   process.exit(1);
 });
 
+// app.set("view engine", "ejs");
+// app.set("views", path.resolve("./views"));
+
+app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json({ limit: "5mb" }));
 // for mongodb query in inpatch
 app.use(ExpressMongoSanitize());
 // for bad html in inpatch
-app.use(xss());
 app.use(hpp());
 app.use(helmet());
 
@@ -60,7 +62,8 @@ app.use("/api/v1/public/", publicRoute);
 app.use("/api/v1/seller/", sellerRoute);
 app.use("/api/v1/admin/", adminRoute);
 
-app.get("/", (req, res) => res.send("Hello India!"));
+app.get("/", (req, res) => res.send("hello India!"));
+
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.url} on this server`, 404));
 });
