@@ -6,7 +6,7 @@ import Cart from "../models/cartModel.js";
 
 const addSellerProduct = catchAsync(async (req, res, next) => {
   const sellerId = req.user._id;
-  const image = req.file.path;
+  const image = req.file.path || req.body.image;
   console.log(image);
   const { title, description, category, price, totalQuantity } = req.body;
   if (
