@@ -6,8 +6,9 @@ import Cart from "../models/cartModel.js";
 
 const addSellerProduct = catchAsync(async (req, res, next) => {
   const sellerId = req.user._id;
-  const { title, description, category, price, image, totalQuantity } =
-    req.body;
+  const image = req.file.path;
+  console.log(image);
+  const { title, description, category, price, totalQuantity } = req.body;
   if (
     !title ||
     !description ||
@@ -18,7 +19,7 @@ const addSellerProduct = catchAsync(async (req, res, next) => {
   ) {
     return next(new AppError("please fill all field", 401));
   }
-  const productData = await Product.create({ ...req.body, sellerId });
+  const productData = await Product.create({ ...req.body, image, sellerId });
   // productData._id = sellerId;
   res.status(201).json({
     status: "success",

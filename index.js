@@ -15,7 +15,7 @@ import hpp from "hpp";
 
 dotenv.config({ path: "./.env" });
 const app = express();
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 6000;
 
 // uncaughtException
 process.on("uncaughtException", (err) => {
@@ -61,6 +61,7 @@ app.use("/api/v1/customer/", customerRoute);
 app.use("/api/v1/public/", publicRoute);
 app.use("/api/v1/seller/", sellerRoute);
 app.use("/api/v1/admin/", adminRoute);
+app.use("/public/", express.static("uploads"));
 
 app.get("/", (req, res) => res.send("hello India!"));
 

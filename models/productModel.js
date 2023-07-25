@@ -4,7 +4,7 @@ const productSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      minlength: [8, "product have more than 8 charchter title"],
+      minlength: [4, "product have more than 4 charchter title"],
       require: [true, "product must have title"],
     },
     sellerId: {
@@ -50,7 +50,7 @@ const productSchema = new mongoose.Schema(
     //     },
     //   },
     // },
-    price: { type: Number, require: [true, "product must have price"] },
+    price: { type: String, require: [true, "product must have price"] },
     image: {
       type: String,
       require: [true, "product must have image"],

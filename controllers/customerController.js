@@ -118,6 +118,7 @@ const forgetPassword = async (req, res, next) => {
   }
   // check user existed or not
   const customerData = await Customer.findOne({ email });
+
   if (!customerData) {
     return next(new AppError("User not found with this id", 404));
   }
@@ -126,10 +127,10 @@ const forgetPassword = async (req, res, next) => {
   // validateBeforeSave: flase
   await customerData.save({ validateBeforeSave: false });
   // 3) Send email
-  const resetURL = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/users/resetPassword/${resetToken}`;
-  const message = `forget your password? \n passwordConfirm to:${resetURL}.If you din't forget your password please ignore this email!`;
+  const resetURL = `${req.protocol}://${req.get("host")}/api/v1/${
+    customerData.roles
+  }/resetPassword/${resetToken}`;
+  const message = `forget your password? \n passwordConfirm to:${resetURL} .If you din't forget your password please ignore this email!`;
 
   try {
     const options = {
@@ -176,12 +177,13 @@ const resetPassword = catchAsync(async (req, res, next) => {
   if (!customerData) {
     return next(new AppError("Token was expire or invalid", 404));
   }
+  // 3) update password update
+
   customerData.password = password;
   customerData.confirmPassword = confirmPassword;
   customerData.passwordResetToken = undefined;
   customerData.passwordResetExpires = undefined;
   await customerData.save();
-  // 3) update password update
 
   // 4) Signin user
   const token = jwt.sign(

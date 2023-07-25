@@ -52,7 +52,12 @@ router
 router
   .route("/products")
   .get(authUser, restrictTo("seller", "admin"), getSellerProduct)
-  .post(authUser, restrictTo("seller", "admin"), addSellerProduct);
+  .post(
+    authUser,
+    restrictTo("seller", "admin"),
+    upload.single("image"),
+    addSellerProduct
+  );
 
 router
   .route("/:sellerId")
